@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# password-manager
+Modern and simple password manager built with Next.js 14, TypeScript, and Supabase. Secure password storage with categories and search.
 
-## Getting Started
+## ✨ Features
 
-First, run the development server:
+**🔒 Secure Password Storage** - End-to-end encrypted password storage
+**📁 Category Management** - Organize passwords with custom categories and colors
+**🔍 Smart Search** - Quickly find passwords with real-time search functionality
+**🗑️ Trash System** - Safely delete and restore passwords when needed
+**🎨 Modern UI** - Clean, responsive design with dark/light mode support
+**🔐 Master Password** - Additional security layer with master password protection
+**📱 Responsive Design** - Works seamlessly on desktop and mobile devices
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🛠️ Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**Framework**: Next.js 15
+**Language**: TypeScript
+**Styling**: Tailwind CSS
+**UI Components**: shadcn components
+**Database**: Supabase (PostgreSQL)
+**Authentication**: Supabase Auth
+**Icons**: Lucide React
+**Notifications**: Sonner
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
 
-## Learn More
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
+1. Clone the repository with `git clone https://github.com/[your-username]/password-manager-v2.git`.  
+2. Install dependencies using `npm install`.  
+3. Create a `.env.local` file in the root of the project and add your Supabase credentials:  
+   `NEXT_PUBLIC_SUPABASE_URL=your_supabase_url`  
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key`  
+4. Start the development server with `npm run dev`.  
+5. Open `http://localhost:3000` in your browser.  
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
