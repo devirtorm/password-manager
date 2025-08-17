@@ -33,7 +33,7 @@ Modern and simple password manager built with Next.js 14, TypeScript, and Supaba
 ### Installation
 
 ### Installation
-1. Clone the repository with `git clone https://github.com/[your-username]/password-manager-v2.git`.  
+1. Clone the repository with `git clone https://github.com/devirtorm/password-manager.git`.  
 2. Install dependencies using `npm install`.  
 3. Create a `.env.local` file in the root of the project and add your Supabase credentials:  
    `NEXT_PUBLIC_SUPABASE_URL=your_supabase_url`  
