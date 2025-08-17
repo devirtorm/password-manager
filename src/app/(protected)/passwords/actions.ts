@@ -1,0 +1,173 @@
+"use server";
+
+import { createClient } from "@/../utils/server";
+import { decryptPassword, encryptPassword, verifyMasterPassword } from "@/../utils/crypto";
+
+export async function decryptUserPassword(
+  encryptedPassword: string, 
+  passwordIv: string, 
+  masterPassword: string
+) {
+  const supabase = await createClient();
+  
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  // Obtener la configuración del vault
+  const { data: vaultConfig, error: vaultError } = await supabase
+    .from("vault_config")
+    .select("salt")
+    .eq("user_id", user.id)
+    .single();
+
+  if (vaultError || !vaultConfig) {
+    throw new Error("Vault configuration not found");
+  }
+
+  try {
+    // Descifrar usando la función actualizada con IV
+    const decrypted = decryptPassword(
+      encryptedPassword,
+      passwordIv, 
+      masterPassword, 
+      vaultConfig.salt
+    );
+    
+    return decrypted;
+  } catch (error) {
+    throw new Error("Failed to decrypt password. Invalid master password or corrupted data.");
+  }
+}
+
+export async function deactivatePassword(passwordId: string) {
+  const supabase = await createClient();
+  
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  const { error: updateError } = await supabase
+    .from("passwords")
+    .update({ active: false })
+    .eq("id", passwordId)
+    .eq("user_id", user.id);
+
+  if (updateError) {
+    throw new Error("Failed to deactivate password");
+  }
+}
+
+export async function restorePassword(passwordId: string) {
+  const supabase = await createClient();
+  
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  const { error: updateError } = await supabase
+    .from("passwords")
+    .update({ active: true })
+    .eq("id", passwordId)
+    .eq("user_id", user.id);
+
+  if (updateError) {
+    throw new Error("Failed to restore password");
+  }
+}
+
+export async function deletePasswordPermanently(passwordId: string) {
+  const supabase = await createClient();
+  
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  const { error: deleteError } = await supabase
+    .from("passwords")
+    .delete()
+    .eq("id", passwordId)
+    .eq("user_id", user.id);
+
+  if (deleteError) {
+    throw new Error("Failed to delete password permanently");
+  }
+}
+
+export async function createPassword(formData: FormData) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  const title = formData.get("name") as string;
+  const username = formData.get("username") as string;
+  const url = formData.get("url") as string;
+  const password = formData.get("password") as string;
+  const masterPassword = formData.get("masterPassword") as string;
+
+  if (!title || !password || !masterPassword) {
+    throw new Error("Missing required fields");
+  }
+
+  // Obtener la configuración del vault del usuario
+  const { data: vaultConfig, error: vaultError } = await supabase
+    .from("vault_config")
+    .select("salt, master_password_hash")
+    .eq("user_id", user.id)
+    .single();
+
+  if (vaultError || !vaultConfig) {
+    throw new Error("Vault configuration not found. Please set up your master password first.");
+  }
+
+  // VERIFICAR que la master password sea correcta
+  const isValidMasterPassword = await verifyMasterPassword(
+    masterPassword, 
+    vaultConfig.master_password_hash
+  );
+
+  if (!isValidMasterPassword) {
+    throw new Error("Invalid master password");
+  }
+
+  // Cifrar la contraseña con la master password VERIFICADA
+  const { encrypted: encryptedPassword, iv } = encryptPassword(password, masterPassword, vaultConfig.salt);
+
+  // Guardar en la base de datos
+  const { data, error: insertError } = await supabase
+    .from("passwords")
+    .insert({
+      user_id: user.id,
+      title,
+      username,
+      password: encryptedPassword,
+      password_iv: iv, 
+      url,
+      active: true,
+    })
+    .select()
+    .single();
+
+    console.log(insertError);
+
+  if (insertError) {
+    console.error("Error inserting password:", insertError);
+    console.log("data:", data);
+    throw new Error("Failed to create password: " + insertError.message);
+  }
+}

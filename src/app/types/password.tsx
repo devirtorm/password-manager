@@ -1,0 +1,12 @@
+export interface Password {
+  id: string;
+  user_id: string;
+  title: string;
+  username?: string;
+  password: string;
+  url?: string;
+  created_at: string;
+  // Encrypted data fields
+  password_iv?: string;
+  password_tag?: string;
+}
