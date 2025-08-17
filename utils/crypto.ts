@@ -13,7 +13,7 @@ export async function verifyMasterPassword(password: string, hash: string): Prom
   return await bcrypt.compare(password, hash);
 }
 
-// Generar sal única para el usuario
+// Generate unique salt for the user
 export function generateSalt(): string {
   return CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
 }
@@ -26,7 +26,7 @@ function deriveKey(masterPassword: string, salt: string): string {
   }).toString();
 }
 
-// Cifrar contraseña individual con IV
+// Encrypt individual password with IV
 export function encryptPassword(password: string, masterPassword: string, salt: string): { encrypted: string, iv: string } {
   const key = deriveKey(masterPassword, salt);
   
@@ -46,7 +46,7 @@ export function encryptPassword(password: string, masterPassword: string, salt: 
   };
 }
 
-// Descifrar contraseña individual con IV
+// Decrypt individual password with IV
 export function decryptPassword(encryptedPassword: string, iv: string, masterPassword: string, salt: string): string {
   const key = deriveKey(masterPassword, salt);
   
@@ -63,7 +63,7 @@ export function decryptPassword(encryptedPassword: string, iv: string, masterPas
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-// Generar contraseña segura
+// Generate secure password
 export function generateSecurePassword(length: number = 16): string {
   const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
   let password = "";
@@ -76,7 +76,7 @@ export function generateSecurePassword(length: number = 16): string {
   return password;
 }
 
-// Validar fortaleza de contraseña
+// Validate password strength
 export function validatePasswordStrength(password: string): {
   score: number;
   feedback: string[];

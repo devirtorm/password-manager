@@ -16,7 +16,7 @@ export async function decryptUserPassword(
     throw new Error("User not authenticated");
   }
 
-  // Obtener la configuración del vault
+  // Get vault configuration
   const { data: vaultConfig, error: vaultError } = await supabase
     .from("vault_config")
     .select("salt")
@@ -124,7 +124,7 @@ export async function createPassword(formData: FormData) {
     throw new Error("Missing required fields");
   }
 
-  // Obtener la configuración del vault del usuario
+  // Get user's vault configuration
   const { data: vaultConfig, error: vaultError } = await supabase
     .from("vault_config")
     .select("salt, master_password_hash")
@@ -145,7 +145,7 @@ export async function createPassword(formData: FormData) {
     throw new Error("Invalid master password");
   }
 
-  // Cifrar la contraseña con la master password VERIFICADA
+  // Encrypt the password with the VERIFIED master password
   const { encrypted: encryptedPassword, iv } = encryptPassword(password, masterPassword, vaultConfig.salt);
 
   // Guardar en la base de datos
