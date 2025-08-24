@@ -2,45 +2,51 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { createClient } from '../../../utils/supabase/server'
+import { LoginFormSchema, LoginFormState } from '@/lib/definitions'
 
-import { createClient } from '../../../utils/server'
+export async function login(state: LoginFormState, formData: FormData): Promise<LoginFormState> {
+  // 1. Validate form fields
+  const validatedFields = LoginFormSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  })
 
-export async function login(formData: FormData) {
-  const supabase = await createClient()
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  // If any form fields are invalid, return early
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    }
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  // 2. Prepare data for authentication
+  const { email, password } = validatedFields.data
 
-  if (error) {
-    redirect('/error')
+  try {
+    const supabase = await createClient()
+
+    // 3. Authenticate user with Supabase
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      return {
+        message: 'Invalid credentials. Please check your email and password.',
+      }
+    }
+
+    // If login successful, revalidate and return success
+    revalidatePath('/', 'layout')
+    return {
+      message: 'success'
+    }
+
+  } catch (error) {
+    return {
+      message: 'An unexpected error occurred. Please try again.' + error,
+    }
   }
-
-  revalidatePath('/', 'layout')
-  redirect('/dashboard')
 }
 
-export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  const { error } = await supabase.auth.signUp(data)
-
-  if (error) {
-    redirect('/error')
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/account')
-}

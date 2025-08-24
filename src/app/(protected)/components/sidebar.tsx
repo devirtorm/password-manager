@@ -132,7 +132,7 @@ export function Sidebar({
         <div className="flex h-16 items-center justify-between px-4 border-b">
           {!collapsed && !isMobile && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">S</span>
               </div>
               <span className="text-lg font-semibold">SignSafe</span>
@@ -142,7 +142,7 @@ export function Sidebar({
           {isMobile && (
             <>
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">S</span>
                 </div>
                 <span className="text-lg font-semibold">SignSafe</span>

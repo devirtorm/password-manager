@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
 
 interface MasterPasswordDialogProps {
   open: boolean;
@@ -33,6 +34,32 @@ export function MasterPasswordDialog({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  const { hasPassword, getCachedPassword, cachePassword } = useMasterPasswordSession();
+
+  // Si hay una master password en cache, usarla automáticamente
+  useEffect(() => {
+    if (open && hasPassword) {
+      const cachedPassword = getCachedPassword();
+      if (cachedPassword) {
+        // Usar automáticamente la password en cache
+        handleSubmitWithCachedPassword(cachedPassword);
+      }
+    }
+  }, [open, hasPassword]);
+
+  const handleSubmitWithCachedPassword = async (cachedPassword: string) => {
+    setIsLoading(true);
+    try {
+      await onSubmit(cachedPassword);
+      onOpenChange(false);
+    } catch (error) {
+      // Si falla con la password en cache, mostrar el diálogo
+      setError("Cached password failed. Please enter your master password again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +73,8 @@ export function MasterPasswordDialog({
     
     try {
       await onSubmit(masterPassword);
+      // Si fue exitoso, guardar en cache para la sesión
+      cachePassword(masterPassword);
       setMasterPassword("");
       onOpenChange(false);
     } catch (error) {
@@ -108,7 +137,7 @@ export function MasterPasswordDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading || !masterPassword.trim()}>
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={isLoading || !masterPassword.trim()}>
               {isLoading ? "Decrypting..." : "Decrypt"}
             </Button>
           </DialogFooter>

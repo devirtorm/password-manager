@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/../utils/server";
 import { decryptPassword, encryptPassword, verifyMasterPassword } from "@/../utils/crypto";
 
@@ -135,7 +136,6 @@ export async function createPassword(formData: FormData) {
     throw new Error("Vault configuration not found. Please set up your master password first.");
   }
 
-  // VERIFICAR que la master password sea correcta
   const isValidMasterPassword = await verifyMasterPassword(
     masterPassword, 
     vaultConfig.master_password_hash
@@ -170,4 +170,8 @@ export async function createPassword(formData: FormData) {
     console.log("data:", data);
     throw new Error("Failed to create password: " + insertError.message);
   }
+
+  revalidatePath("/passwords");
+  
+  return { success: true, data };
 }

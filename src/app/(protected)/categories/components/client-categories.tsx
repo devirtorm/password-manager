@@ -7,7 +7,7 @@ import { SearchBar } from "@/components/ui/search-bar";
 import { useSearch } from "@/hooks/useSearch";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FolderArchive, Search } from "lucide-react";
-import CategorieCard from "./categorie-card";
+import CategorieCard from "./category-card";
 import { actionToasts, showToast } from "@/utils/toast";
 
 interface ClientCategoriesProps {
@@ -76,7 +76,6 @@ export function ClientCategories({
             <CategorieCard
               key={category.id}
               category={category}
-              onDeactivate={handleDeactivate}
               onPermanentDelete={handlePermanentDelete}
               onEdit={handleEdit}
             />

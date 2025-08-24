@@ -196,9 +196,8 @@ export default function PasswordCard({
 
         <div className="flex flex-wrap gap-2">
           <Button
-            variant="outline"
             size="sm"
-            className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3"
+            className="bg-indigo-500 hover:bg-indigo-600 text-xs px-3"
             onClick={() => copyToClipboard(password.username || "", "Username")}
           >
             <Copy className="h-4 w-4 mr-1" />
@@ -206,9 +205,8 @@ export default function PasswordCard({
           </Button>
 
           <Button
-            variant="outline"
             size="sm"
-            className="bg-gray-600 hover:bg-gray-700 text-white text-xs px-3"
+            className="bg-gray-600 hover:bg-gray-700 text-xs px-3"
             onClick={handleCopyPassword}
             disabled={isDecrypting}
           >
@@ -256,7 +254,7 @@ export default function PasswordCard({
         </div>
 
         {showPassword && decryptedPassword && (
-          <div className="mt-2 p-3 bg-gray-50 border border-teal-200 rounded text-sm font-mono text-teal-800 shadow-inner">
+          <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono text-gray-800 shadow-sm backdrop-blur-2xl">
             {decryptedPassword}
           </div>
         )}

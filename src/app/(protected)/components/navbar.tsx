@@ -8,10 +8,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { DropdownMenuSeparator } from "@radix-ui/react-dropdown-menu";
 import {
   Bell,
   HelpCircle,
@@ -23,6 +23,8 @@ import {
   Menu,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from "../../../../utils/client";
 
 interface NavbarProps {
   user?: {
@@ -39,6 +41,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) {
+  const router = useRouter();
+  
   const getInitials = (name?: string | null, email?: string | null) => {
     if (name) {
       return name
@@ -52,6 +56,18 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
     }
     return "U";
   };
+  
+  const handleLogout = async () => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    if(error) {
+      console.log("Error signing out:", error.message);
+    } else {
+      router.push("/login");
+    }
+  }
+
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -104,7 +120,7 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
                     src={user?.image || ""}
                     alt={userDetails?.first_name || "User"}
                   />
-                  <AvatarFallback className="bg-teal-500 text-white">
+                  <AvatarFallback className="bg-indigo-500 text-white">
                     {getInitials(userDetails?.first_name, userDetails?.email)}
                   </AvatarFallback>
                 </Avatar>
@@ -141,7 +157,7 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
