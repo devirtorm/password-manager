@@ -30,7 +30,7 @@ export default async function Home() {
                 <Link href="/login" >Log In</Link>
               </Button>
               <Button className="bg-indigo-800 hover:bg-indigo-700 text-white border border-indigo-800">
-                Sign Up
+                <Link href="/signup">Sign Up</Link>
               </Button>
             </div>
           </div>
