@@ -60,7 +60,7 @@ export default async function Home() {
                 <Link href="/login">Try Demo</Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-indigo-300 text-indigo-700 hover:bg-indigo-100" asChild>
-                <Link href="https://github.com/yourusername/password-manager" target="_blank">
+                <Link href="https://github.com/devirtorm/password-manager" target="_blank">
                   View on GitHub
                 </Link>
               </Button>

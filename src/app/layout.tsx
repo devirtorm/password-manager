@@ -16,8 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Password Manager",
-  description: "A secure and modern password manager built with Next.js",
+  title: {
+    default: "Password Manager",
+    template: "%s | Password Manager"
+  },
+  description: "A secure and modern password manager built with Next.js and Supabase. Organize, secure, and manage all your passwords in one place.",
+  keywords: ["password manager", "security", "encryption", "passwords", "nextjs", "supabase"],
+  authors: [{ name: "DevirtorM" }],
+  creator: "DevirtorM",
+  metadataBase: new URL('https://password-manager-jfzvpag1f-irvings-projects-0af29d30.vercel.app'),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://password-manager-jfzvpag1f-irvings-projects-0af29d30.vercel.app",
+    title: "Password Manager",
+    description: "A secure and modern password manager built with Next.js and Supabase",
+    siteName: "Password Manager",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({

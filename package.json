@@ -2,6 +2,14 @@
   "name": "password-manager-v2",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://github.com/devirtorm/password-manager",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devirtorm/password-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/devirtorm/password-manager/issues"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

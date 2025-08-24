@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /login
+Disallow: /signup
+Disallow: /dashboard
+Disallow: /passwords
+Disallow: /categories
+Disallow: /(protected)
+
+Allow: /
+
+Sitemap: https://password-manager-jfzvpag1f-irvings-projects-0af29d30.vercel.app/sitemap.xml
