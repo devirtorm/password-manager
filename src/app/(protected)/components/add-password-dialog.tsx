@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -18,10 +17,16 @@ import { useState, useEffect, useActionState } from "react";
 import { createPassword } from "../passwords/actions";
 import { toast } from "sonner";
 import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
+import { masterPasswordCache } from "@/utils/master-password-session";
 import {
   changeTypeInput,
   getPasswordIcon,
 } from "../../../../utils/show-password";
+
+interface FormState {
+  message?: string;
+  error?: string;
+}
 
 interface AddPasswordDialogProps {
   children: React.ReactNode;
@@ -32,16 +37,17 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   const [showMasterPassword, setShowMasterPassword] = useState(false);
   const [open, setOpen] = useState(false);
   
-  const { hasPassword, getCachedPassword, cachePassword } = useMasterPasswordSession();
+  const { isUnlocked, getCachedPassword, unlock, extendSession } = useMasterPasswordSession();
   
   const [state, formAction, isPending] = useActionState(
-    async (prevState: any, formData: FormData) => {
+    async (prevState: FormState, formData: FormData) => {
       try {
         // Si hay una master password en cache, usarla automáticamente
-        if (hasPassword) {
+        if (isUnlocked) {
           const cachedPassword = getCachedPassword();
           if (cachedPassword) {
             formData.set('masterPassword', cachedPassword);
+            extendSession(); // Extend session on use
           }
         }
         
@@ -143,7 +149,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
           </div>
           
           {/* Solo mostrar el campo de master password si no está en cache */}
-          {!hasPassword && (
+          {!isUnlocked && (
             <div className="grid gap-3 my-2 border p-3 rounded-sm bg-indigo-50/50">
               <div className="grid gap-3">
                 <Label htmlFor="master-password">Master Password</Label>
@@ -158,7 +164,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
                     onChange={(e) => {
                       // Guardar la master password en cache cuando se escribe
                       if (e.target.value.length > 0) {
-                        cachePassword(e.target.value);
+                        unlock(e.target.value);
                       }
                     }}
                   />
@@ -180,7 +186,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
           )}
           
           {/* Mostrar información cuando la master password está en cache */}
-          {hasPassword && (
+          {isUnlocked && (
             <div className="grid gap-3 my-2 border p-3 rounded-sm bg-green-50/50 border-green-200">
               <div className="flex items-center gap-2 text-sm text-green-700">
                 <Eye className="h-4 w-4" />

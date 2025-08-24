@@ -25,6 +25,8 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/client";
+import { SessionStatus } from "./session-status";
+import { masterPasswordCache } from "@/utils/master-password-session";
 
 interface NavbarProps {
   user?: {
@@ -59,6 +61,8 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
   
   const handleLogout = async () => {
     const supabase = createClient();
+    // Clear master password cache before logout
+    masterPasswordCache.clear();
     const { error } = await supabase.auth.signOut();
     if(error) {
       console.log("Error signing out:", error.message);
@@ -96,6 +100,9 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
 
         {/* Right side actions */}
         <div className="flex items-center space-x-4">
+          {/* Session Status */}
+          <SessionStatus />
+          
           {/* Security Status */}
           <Badge variant="outline" className="hidden sm:flex">
             <Shield className="w-3 h-3 mr-1" />

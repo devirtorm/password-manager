@@ -1,40 +1,67 @@
-"use client";
-
-import { useState, useCallback } from 'react';
-
-// Variable global para mantener la master password durante la sesión
-let globalMasterPassword: string | null = null;
+import { useState, useEffect } from 'react';
+import { masterPasswordCache } from '@/utils/master-password-session';
 
 export function useMasterPasswordSession() {
-  const [hasCachedPassword, setHasCachedPassword] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(0);
 
-  // Guardar master password en memoria durante la sesión
-  const cachePassword = useCallback((password: string) => {
-    globalMasterPassword = password;
-    setHasCachedPassword(true);
+  useEffect(() => {
+    // Initial state
+    setIsUnlocked(masterPasswordCache.isUnlocked());
+    setRemainingTime(masterPasswordCache.getRemainingTime());
+
+    // Listen for vault lock events
+    const handleVaultLocked = () => {
+      setIsUnlocked(false);
+      setRemainingTime(0);
+    };
+
+    // Update remaining time every minute
+    const interval = setInterval(() => {
+      const remaining = masterPasswordCache.getRemainingTime();
+      setRemainingTime(remaining);
+      
+      if (remaining === 0) {
+        setIsUnlocked(false);
+      }
+    }, 60000); // Update every minute
+
+    // Listen for custom vault lock event
+    if (typeof window !== 'undefined') {
+      window.addEventListener('vault-locked', handleVaultLocked);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('vault-locked', handleVaultLocked);
+      }
+    };
   }, []);
 
-  // Obtener master password desde cache
-  const getCachedPassword = useCallback((): string | null => {
-    return globalMasterPassword;
-  }, []);
+  const unlock = (password: string) => {
+    masterPasswordCache.set(password);
+    setIsUnlocked(true);
+    setRemainingTime(masterPasswordCache.getRemainingTime());
+  };
 
-  // Limpiar cache (cuando se refresca la página se limpia automáticamente)
-  const clearCache = useCallback(() => {
-    globalMasterPassword = null;
-    setHasCachedPassword(false);
-  }, []);
+  const lock = () => {
+    masterPasswordCache.clear();
+    setIsUnlocked(false);
+    setRemainingTime(0);
+  };
 
-  // Verificar si hay password en cache
-  const hasPassword = useCallback((): boolean => {
-    return globalMasterPassword !== null && globalMasterPassword.length > 0;
-  }, []);
+  const extendSession = () => {
+    masterPasswordCache.extendSession();
+    setRemainingTime(masterPasswordCache.getRemainingTime());
+  };
 
   return {
-    cachePassword,
-    getCachedPassword,
-    clearCache,
-    hasPassword: hasPassword(),
-    hasCachedPassword
+    isUnlocked,
+    remainingTime,
+    unlock,
+    lock,
+    extendSession,
+    getCachedPassword: masterPasswordCache.get,
   };
 }

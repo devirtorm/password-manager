@@ -12,7 +12,7 @@ interface FormInputProps {
   placeholder?: string;
   required?: boolean;
   error?: FieldError;
-  register: UseFormRegister<any>;
+  register: UseFormRegister<Record<string, unknown>>;
   className?: string;
   autoComplete?: string;
 }

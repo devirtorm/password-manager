@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Card,
@@ -15,9 +15,8 @@ import { hashMasterPassword, generateSalt } from "../../../../utils/crypto";
 import MasterPasswordSetup from "./components/master-password-setup";
 import LoadingScreen from "./components/loading-screen";
 import SignupProgress from "../components/signup-progress";
-import { X } from "lucide-react";
 
-export default function SignupConfirmPage() {
+function SignupConfirmContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -222,4 +221,12 @@ export default function SignupConfirmPage() {
   }
 
   return null;
+}
+
+export default function SignupConfirmPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <SignupConfirmContent />
+    </Suspense>
+  );
 }

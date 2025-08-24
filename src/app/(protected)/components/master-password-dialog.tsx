@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
+import { masterPasswordCache } from "@/utils/master-password-session";
 
 interface MasterPasswordDialogProps {
   open: boolean;
@@ -35,26 +36,26 @@ export function MasterPasswordDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
-  const { hasPassword, getCachedPassword, cachePassword } = useMasterPasswordSession();
+  const { isUnlocked, getCachedPassword, unlock, extendSession } = useMasterPasswordSession();
 
   // Si hay una master password en cache, usarla automáticamente
   useEffect(() => {
-    if (open && hasPassword) {
+    if (open && isUnlocked) {
       const cachedPassword = getCachedPassword();
       if (cachedPassword) {
         // Usar automáticamente la password en cache
         handleSubmitWithCachedPassword(cachedPassword);
       }
     }
-  }, [open, hasPassword]);
+  }, [open, isUnlocked]);
 
   const handleSubmitWithCachedPassword = async (cachedPassword: string) => {
     setIsLoading(true);
     try {
       await onSubmit(cachedPassword);
+      extendSession();
       onOpenChange(false);
     } catch (error) {
-      // Si falla con la password en cache, mostrar el diálogo
       setError("Cached password failed. Please enter your master password again.");
     } finally {
       setIsLoading(false);
@@ -74,7 +75,7 @@ export function MasterPasswordDialog({
     try {
       await onSubmit(masterPassword);
       // Si fue exitoso, guardar en cache para la sesión
-      cachePassword(masterPassword);
+      unlock(masterPassword);
       setMasterPassword("");
       onOpenChange(false);
     } catch (error) {
