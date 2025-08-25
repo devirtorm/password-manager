@@ -1,4 +1,3 @@
-'use client';
 import DashboardHeader from "./components/dashboard-header";
 import StatsCards from "./components/stats-card";
 import RecentPassword from "./components/recent-password";
