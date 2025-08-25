@@ -1,8 +1,3 @@
-/**
- * Session status component - shows vault lock status and remaining time
- * Similar to Bitwarden's session timeout indicator
- */
-
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -11,10 +6,12 @@ import { Badge } from '@/components/ui/badge';
 import { Lock, Unlock, Clock, LogOut } from 'lucide-react';
 import { useMasterPasswordSession } from '@/hooks/useMasterPasswordSession';
 import { masterPasswordCache } from '@/utils/master-password-session';
+import { MasterPasswordDialog } from './master-password-dialog';
 
 export function SessionStatus() {
-  const { isUnlocked, remainingTime, lock } = useMasterPasswordSession();
+  const { isUnlocked, lock } = useMasterPasswordSession();
   const [displayTime, setDisplayTime] = useState('');
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false);
 
   useEffect(() => {
     const formatTime = (milliseconds: number) => {
@@ -23,33 +20,72 @@ export function SessionStatus() {
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
-    if (remainingTime > 0) {
-      setDisplayTime(formatTime(remainingTime));
-    } else {
-      setDisplayTime('');
-    }
+    const updateDisplayTime = () => {
+      if (isUnlocked) {
+        const remaining = masterPasswordCache.getRemainingTime();
+        if (remaining > 0) {
+          setDisplayTime(formatTime(remaining));
+        } else {
+          setDisplayTime('');
+        }
+      } else {
+        setDisplayTime('');
+      }
+    };
+
+    // Initial update
+    updateDisplayTime();
 
     // Update every second when unlocked
+    let interval: NodeJS.Timeout | null = null;
     if (isUnlocked) {
-      const interval = setInterval(() => {
-        const remaining = masterPasswordCache.getRemainingTime();
-        setDisplayTime(formatTime(remaining));
-      }, 1000);
-
-      return () => clearInterval(interval);
+      interval = setInterval(updateDisplayTime, 1000);
     }
-  }, [isUnlocked, remainingTime]);
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isUnlocked]);
 
   const handleLock = () => {
     lock();
   };
 
+  const handleUnlock = () => {
+    setShowUnlockDialog(true);
+  };
+
+  const handleUnlockSubmit = async (masterPassword: string) => {
+    // Esta función solo necesita validar que la contraseña es correcta
+    // El MasterPasswordDialog ya maneja el unlock automáticamente
+    return Promise.resolve();
+  };
+
   if (!isUnlocked) {
     return (
-      <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Lock className="h-4 w-4" />
-        <span>Vault Locked</span>
-      </div>
+      <>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleUnlock}
+          className="h-auto p-0 hover:bg-transparent"
+        >
+          <Badge className="bg-indigo-700 hover:bg-indigo-600 text-white flex items-center gap-2 text-xs cursor-pointer transition-colors">
+            <Lock className="h-4 w-4" />
+            <span>Vault Locked - Click to Unlock</span>
+          </Badge>
+        </Button>
+        
+        <MasterPasswordDialog
+          open={showUnlockDialog}
+          onOpenChange={setShowUnlockDialog}
+          onSubmit={handleUnlockSubmit}
+          title="Unlock Vault"
+          description="Enter your master password to unlock the vault and access your passwords."
+        />
+      </>
     );
   }
 

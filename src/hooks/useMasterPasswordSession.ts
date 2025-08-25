@@ -16,25 +16,36 @@ export function useMasterPasswordSession() {
       setRemainingTime(0);
     };
 
-    // Update remaining time every minute
-    const interval = setInterval(() => {
+    // Listen for vault unlock events
+    const handleVaultUnlocked = () => {
+      setIsUnlocked(true);
+      setRemainingTime(masterPasswordCache.getRemainingTime());
+    };
+
+    // Update remaining time more frequently when close to expiration
+    const updateInterval = () => {
       const remaining = masterPasswordCache.getRemainingTime();
       setRemainingTime(remaining);
       
       if (remaining === 0) {
         setIsUnlocked(false);
       }
-    }, 60000); // Update every minute
+    };
 
-    // Listen for custom vault lock event
+    // Check every 10 seconds instead of every minute for better UX
+    const interval = setInterval(updateInterval, 10000);
+
+    // Listen for custom vault events
     if (typeof window !== 'undefined') {
       window.addEventListener('vault-locked', handleVaultLocked);
+      window.addEventListener('vault-unlocked', handleVaultUnlocked);
     }
 
     return () => {
       clearInterval(interval);
       if (typeof window !== 'undefined') {
         window.removeEventListener('vault-locked', handleVaultLocked);
+        window.removeEventListener('vault-unlocked', handleVaultUnlocked);
       }
     };
   }, []);
@@ -43,12 +54,22 @@ export function useMasterPasswordSession() {
     masterPasswordCache.set(password);
     setIsUnlocked(true);
     setRemainingTime(masterPasswordCache.getRemainingTime());
+    
+    // Dispatch unlock event for other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vault-unlocked'));
+    }
   };
 
   const lock = () => {
     masterPasswordCache.clear();
     setIsUnlocked(false);
     setRemainingTime(0);
+    
+    // Dispatch lock event for other components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vault-locked'));
+    }
   };
 
   const extendSession = () => {

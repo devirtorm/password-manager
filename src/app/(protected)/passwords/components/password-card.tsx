@@ -8,10 +8,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/component
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Badge, Copy, Edit, Eye, EyeOff, Files, Globe, Link2, Loader2, MoreHorizontal, Trash2, RotateCcw, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { MasterPasswordDialog } from "../../components/master-password-dialog";
 import { decryptUserPassword } from "../actions";
+import { useMasterPasswordSession } from "@/hooks/useMasterPasswordSession";
 
 interface PasswordCardProps {
   password: Password;
@@ -33,6 +34,19 @@ export default function PasswordCard({
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [showMasterPasswordDialog, setShowMasterPasswordDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<'show' | 'copy' | null>(null);
+  
+  const { isUnlocked, getCachedPassword } = useMasterPasswordSession();
+
+  // Reset password visibility when vault is locked
+  useEffect(() => {
+    if (!isUnlocked) {
+      setShowPassword(false);
+      setDecryptedPassword(null);
+      setIsDecrypting(false);
+      setShowMasterPasswordDialog(false);
+      setPendingAction(null);
+    }
+  }, [isUnlocked]);
 
   const copyToClipboard = async (text: string, type: string) => {
     try {
@@ -40,6 +54,41 @@ export default function PasswordCard({
       toast.success(`${type} copied to clipboard!`);
     } catch (error) {
       toast.error(`Failed to copy ${type.toLowerCase()}`);
+    }
+  };
+
+  const handleCopyUsername = () => {
+    // Check if vault is locked
+    if (!isUnlocked) {
+      toast.error("Vault is locked. Please unlock to copy username.");
+      return;
+    }
+    copyToClipboard(password.username || "", "Username");
+  };
+
+  const handleDuplicatePassword = async () => {
+    // Check if vault is locked
+    if (!isUnlocked) {
+      toast.error("Vault is locked. Please unlock to duplicate password.");
+      return;
+    }
+
+    if (decryptedPassword) {
+      copyToClipboard(
+        JSON.stringify(
+          {
+            title: password.title,
+            url: password.url,
+            username: password.username,
+            password: decryptedPassword,
+          },
+          null,
+          2
+        ),
+        "Password data"
+      );
+    } else {
+      toast.error("Please decrypt the password first");
     }
   };
 
@@ -68,6 +117,12 @@ export default function PasswordCard({
   };
 
   const handleShowPassword = async () => {
+    // Check if vault is locked
+    if (!isUnlocked) {
+      toast.error("Vault is locked. Please unlock to view passwords.");
+      return;
+    }
+
     if (showPassword) {
       setShowPassword(false);
       return;
@@ -78,18 +133,68 @@ export default function PasswordCard({
       return;
     }
 
-    setPendingAction('show');
-    setShowMasterPasswordDialog(true);
+    // If vault is unlocked, try to use cached password automatically
+    const cachedPassword = getCachedPassword();
+    if (cachedPassword) {
+      setIsDecrypting(true);
+      try {
+        const decrypted = await decryptUserPassword(
+          password.password,
+          password.password_iv || "",
+          cachedPassword
+        );
+        setDecryptedPassword(decrypted);
+        setShowPassword(true);
+      } catch (error) {
+        // If cached password fails, show dialog
+        setPendingAction('show');
+        setShowMasterPasswordDialog(true);
+      } finally {
+        setIsDecrypting(false);
+      }
+    } else {
+      // No cached password available, show dialog
+      setPendingAction('show');
+      setShowMasterPasswordDialog(true);
+    }
   };
 
   const handleCopyPassword = async () => {
+    // Check if vault is locked
+    if (!isUnlocked) {
+      toast.error("Vault is locked. Please unlock to copy passwords.");
+      return;
+    }
+
     if (decryptedPassword) {
       await copyToClipboard(decryptedPassword, "Password");
       return;
     }
 
-    setPendingAction('copy');
-    setShowMasterPasswordDialog(true);
+    // If vault is unlocked, try to use cached password automatically
+    const cachedPassword = getCachedPassword();
+    if (cachedPassword) {
+      setIsDecrypting(true);
+      try {
+        const decrypted = await decryptUserPassword(
+          password.password,
+          password.password_iv || "",
+          cachedPassword
+        );
+        setDecryptedPassword(decrypted);
+        await copyToClipboard(decrypted, "Password");
+      } catch (error) {
+        // If cached password fails, show dialog
+        setPendingAction('copy');
+        setShowMasterPasswordDialog(true);
+      } finally {
+        setIsDecrypting(false);
+      }
+    } else {
+      // No cached password available, show dialog
+      setPendingAction('copy');
+      setShowMasterPasswordDialog(true);
+    }
   };
 
   return (
@@ -132,32 +237,7 @@ export default function PasswordCard({
               
               {onDeactivate && (
                 <>
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      try {
-                        const decryptedPass = decryptedPassword;
-                        if (decryptedPass) {
-                          copyToClipboard(
-                            JSON.stringify(
-                              {
-                                title: password.title,
-                                url: password.url,
-                                username: password.username,
-                                password: decryptedPass,
-                              },
-                              null,
-                              2
-                            ),
-                            "Password data"
-                          );
-                        } else {
-                          toast.error("Please decrypt the password first");
-                        }
-                      } catch (error) {
-                        toast.error("Failed to export password data");
-                      }
-                    }}
-                  >
+                  <DropdownMenuItem onClick={handleDuplicatePassword}>
                     <Files className="h-4 w-4 mr-2" />
                     Duplicate
                   </DropdownMenuItem>
@@ -198,7 +278,7 @@ export default function PasswordCard({
           <Button
             size="sm"
             className="bg-indigo-500 hover:bg-indigo-600 text-xs px-3"
-            onClick={() => copyToClipboard(password.username || "", "Username")}
+            onClick={handleCopyUsername}
           >
             <Copy className="h-4 w-4 mr-1" />
             Copy User

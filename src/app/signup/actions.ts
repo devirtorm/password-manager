@@ -38,7 +38,9 @@ export async function signup(
           name: name,
           display_name: name,
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/signup/confirm`,
+        emailRedirectTo: `${
+          process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+        }/signup/confirm`,
       },
     });
 
@@ -81,7 +83,7 @@ export async function signup(
     // Save user profile to user_profiles table
     try {
       const { error: profileError } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .insert({
           id: data.user.id,
           user_id: data.user.id,
@@ -92,10 +94,10 @@ export async function signup(
         });
 
       if (profileError) {
-        console.error('Profile creation error:', profileError);
+        console.error("Profile creation error:", profileError);
       }
     } catch (profileError) {
-      console.error('Profile creation error:', profileError);
+      console.error("Profile creation error:", profileError);
     }
 
     return {

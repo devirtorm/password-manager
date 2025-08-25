@@ -42,7 +42,6 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   const [state, formAction, isPending] = useActionState(
     async (prevState: FormState, formData: FormData) => {
       try {
-        // Si hay una master password en cache, usarla automáticamente
         if (isUnlocked) {
           const cachedPassword = getCachedPassword();
           if (cachedPassword) {

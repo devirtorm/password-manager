@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter, redirect } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import MasterPasswordSetup from "./components/master-password-setup";
 import LoadingScreen from "./components/loading-screen";
 import SignupProgress from "../components/signup-progress";
 
-function SignupConfirmContent() {
+async function SignupConfirmContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isVerifying, setIsVerifying] = useState(true);
@@ -107,8 +107,10 @@ function SignupConfirmContent() {
       }
 
       // Hash the master password properly
-      const { hash: masterPasswordHash } = await hashMasterPassword(masterPassword);
-      
+      const { hash: masterPasswordHash } = await hashMasterPassword(
+        masterPassword
+      );
+
       // Generate crypto salt for encryption/decryption operations
       const cryptoSalt = generateSalt();
 
@@ -131,7 +133,9 @@ function SignupConfirmContent() {
           return;
         }
 
-        toast.success("Account setup completed! Your master password is now securely encrypted.");
+        toast.success(
+          "Account setup completed! Your master password is now securely encrypted."
+        );
         router.push("/dashboard");
       } catch (vaultError) {
         console.error("Vault creation error:", vaultError);

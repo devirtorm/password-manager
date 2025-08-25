@@ -38,12 +38,10 @@ export function MasterPasswordDialog({
   
   const { isUnlocked, getCachedPassword, unlock, extendSession } = useMasterPasswordSession();
 
-  // Si hay una master password en cache, usarla automáticamente
   useEffect(() => {
     if (open && isUnlocked) {
       const cachedPassword = getCachedPassword();
       if (cachedPassword) {
-        // Usar automáticamente la password en cache
         handleSubmitWithCachedPassword(cachedPassword);
       }
     }
@@ -74,7 +72,6 @@ export function MasterPasswordDialog({
     
     try {
       await onSubmit(masterPassword);
-      // Si fue exitoso, guardar en cache para la sesión
       unlock(masterPassword);
       setMasterPassword("");
       onOpenChange(false);
