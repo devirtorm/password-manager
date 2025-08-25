@@ -1,8 +1,27 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { createClient } from "../../../../../utils/server";
 
-export default function RecentPassword() {
+export default async function RecentPassword() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  // Get recent passwords for current user only
+  const { data } = await supabase
+    .from("passwords")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("active", true)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between mb-4">
@@ -12,82 +31,57 @@ export default function RecentPassword() {
         </Button>
       </div>
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-3 border rounded-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="font-medium">Gmail</p>
-              <p className="text-sm text-muted-foreground">user@gmail.com</p>
-            </div>
-          </div>
-          <Badge variant="outline">Secure</Badge>
-        </div>
+        {data?.length === 0 && (
+          <p className="text-sm text-muted-foreground">No recent passwords.</p>
+        )}
 
-        <div className="flex items-center justify-between p-3 border rounded-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="font-medium">GitHub</p>
-              <p className="text-sm text-muted-foreground">
-                developer@github.com
-              </p>
-            </div>
-          </div>
-          <Badge variant="outline">Secure</Badge>
-        </div>
-
-        <div className="flex items-center justify-between p-3 border rounded-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-4 h-4 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="font-medium">Netflix</p>
-              <p className="text-sm text-muted-foreground">user@netflix.com</p>
+        {data?.map((password: any) => (
+          <div
+            key={password.id}
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              {(() => {
+                const colors = [
+                  "bg-red-100 text-red-600",
+                  "bg-green-100 text-green-600",
+                  "bg-blue-100 text-blue-600",
+                  "bg-yellow-100 text-yellow-600",
+                  "bg-purple-100 text-purple-600",
+                  "bg-pink-100 text-pink-600",
+                  "bg-indigo-100 text-indigo-600",
+                  "bg-teal-100 text-teal-600",
+                ];
+                const idx =
+                  typeof password.id === "string"
+                    ? password.id
+                        .split("")
+                        .reduce(
+                          (acc: number, char: string) =>
+                            acc + char.charCodeAt(0),
+                          0
+                        ) % colors.length
+                    : 0;
+                const colorClass = colors[idx];
+                return (
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${colorClass}`}
+                  >
+                    <span className="font-bold">
+                      {password.title.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                );
+              })()}
+              <div>
+                <p className="font-medium">{password.title}</p>
+                <p className="text-sm text-muted-foreground">
+                  {password.username}
+                </p>
+              </div>
             </div>
           </div>
-          <Badge variant="destructive">Weak</Badge>
-        </div>
+        ))}
       </div>
     </Card>
   );
