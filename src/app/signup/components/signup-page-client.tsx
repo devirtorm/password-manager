@@ -62,9 +62,9 @@ export default function SignupPageClient() {
             <SignupProgress currentStep={currentStep} />
           </div>
 
-          <Card className="backdrop-blur-sm">
+          <Card className="backdrop-blur-sm rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">
+              <CardTitle className="text-center text-xl font-semibold">
                 {getStepTitle()}
               </CardTitle>
             </CardHeader>

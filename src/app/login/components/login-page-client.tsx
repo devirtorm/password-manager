@@ -27,11 +27,11 @@ export default function LoginPageClient() {
 
   // Handle login success or error
   useEffect(() => {
-    if (state?.message === 'success') {
+    if (state?.message === "success") {
       toast.success("Login successful!", {
         description: "Redirecting to dashboard...",
       });
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else if (state?.message) {
       toast.error("Authentication Error", {
         description: state.message,
@@ -65,14 +65,19 @@ export default function LoginPageClient() {
 
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <Card className="backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">Login</CardTitle>
-              <CardDescription>
+          <Card className="backdrop-blur-sm rounded-4xl">
+            <CardHeader className="text-center pt-4">
+              <CardTitle className="text-2xl font-semibold flex items-center justify-center gap-3">
+                <span className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">S</span>
+                </span>
+                Login
+              </CardTitle>
+              <CardDescription className="font-semibold text-gray-600">
                 Enter your credentials to access your vault
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-8">
+            <CardContent className="py-4">
               <form action={formAction} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-700 font-medium">
@@ -102,7 +107,7 @@ export default function LoginPageClient() {
                     className="text-gray-700 font-medium"
                   >
                     Password
-                  </Label> 
+                  </Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-indigo-500" />
                     <Input

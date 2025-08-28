@@ -49,7 +49,7 @@ export default function SignupProgress({ currentStep }: SignupProgressProps) {
   };
 
   return (
-    <nav aria-label="Progress" className="mb-6">
+    <nav aria-label="Progress" className="mb-16">
       <ol className="flex items-center justify-center">
         {steps.map((step, index) => {
           const Icon = step.icon;
