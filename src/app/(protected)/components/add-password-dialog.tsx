@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { useState, useEffect, useActionState } from "react";
+import { useState, useEffect, useActionState, use } from "react";
 import { createPassword } from "../passwords/actions";
 import { toast } from "sonner";
 import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
@@ -22,6 +22,15 @@ import {
   changeTypeInput,
   getPasswordIcon,
 } from "../../../../utils/show-password";
+import { getCategories } from "../categories/actions";
+import { Category } from "@/app/types/category";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface FormState {
   message?: string;
@@ -36,31 +45,51 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showMasterPassword, setShowMasterPassword] = useState(false);
   const [open, setOpen] = useState(false);
-  
-  const { isUnlocked, getCachedPassword, unlock, extendSession } = useMasterPasswordSession();
-  
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const { isUnlocked, getCachedPassword, unlock, extendSession } =
+    useMasterPasswordSession();
+
   const [state, formAction, isPending] = useActionState(
     async (prevState: FormState, formData: FormData) => {
       try {
         if (isUnlocked) {
           const cachedPassword = getCachedPassword();
           if (cachedPassword) {
-            formData.set('masterPassword', cachedPassword);
+            formData.set("masterPassword", cachedPassword);
             extendSession(); // Extend session on use
           }
         }
-        
+
         const result = await createPassword(formData);
         return { success: true, message: "Password added successfully!" };
       } catch (error) {
-        return { 
-          success: false, 
-          message: error instanceof Error ? error.message : "Failed to add password" 
+        return {
+          success: false,
+          message:
+            error instanceof Error ? error.message : "Failed to add password",
         };
       }
     },
     { success: false, message: "" }
   );
+  useEffect(() => {
+    if (!open) {
+      setShowPassword(false);
+      setShowMasterPassword(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      const fetchCategories = async () => {
+        const data = await getCategories();
+        setCategories(data);
+      };
+      fetchCategories();
+    }
+  }, [open]);
 
   // Handle success/error states
   useEffect(() => {
@@ -103,7 +132,12 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
           <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Title</Label>
-              <Input id="name-1" name="name" placeholder="ex: My Email" required />
+              <Input
+                id="name-1"
+                name="name"
+                placeholder="ex: My Email"
+                required
+              />
             </div>
             <div className="grid gap-3">
               <Label htmlFor="username-1">Email or Username</Label>
@@ -145,8 +179,29 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
                 </Button>
               </div>
             </div>
+            <div className="grid gap-3">
+              <Label htmlFor="category">Category</Label>
+              <Select name="categoryId" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: category.color }}
+                        />
+                        {category.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          
+
           {/* Solo mostrar el campo de master password si no está en cache */}
           {!isUnlocked && (
             <div className="grid gap-3 my-2 border p-3 rounded-sm bg-indigo-50/50">
@@ -183,7 +238,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
               </div>
             </div>
           )}
-          
+
           {/* Mostrar información cuando la master password está en cache */}
           {isUnlocked && (
             <div className="grid gap-3 my-2 border p-3 rounded-sm bg-green-50/50 border-green-200">
@@ -192,23 +247,28 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
                 <span>Master password is cached for this session</span>
               </div>
               <p className="text-xs text-green-600">
-                Your passwords will be encrypted automatically. Cache will clear when you refresh the page.
+                Your passwords will be encrypted automatically. Cache will clear
+                when you refresh the page.
               </p>
               {/* Campo oculto para enviar la master password */}
-              <input type="hidden" name="masterPassword" value={getCachedPassword() || ""} />
+              <input
+                type="hidden"
+                name="masterPassword"
+                value={getCachedPassword() || ""}
+              />
             </div>
           )}
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setOpen(false)}
               disabled={isPending}
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="bg-indigo-600 hover:bg-indigo-700"
               disabled={isPending}
             >

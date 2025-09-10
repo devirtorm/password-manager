@@ -120,6 +120,7 @@ export async function createPassword(formData: FormData) {
   const url = formData.get("url") as string;
   const password = formData.get("password") as string;
   const masterPassword = formData.get("masterPassword") as string;
+  const categoryId = formData.get("categoryId") as string | null;
 
   if (!title || !password || !masterPassword) {
     throw new Error("Missing required fields");
@@ -159,6 +160,7 @@ export async function createPassword(formData: FormData) {
       password_iv: iv, 
       url,
       active: true,
+      category_id: categoryId || null,
     })
     .select()
     .single();

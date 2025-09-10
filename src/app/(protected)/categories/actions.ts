@@ -8,6 +8,32 @@ import {
 import { createClient } from "../../../../utils/server";
 import { revalidatePath } from "next/cache";
 
+export async function getCategories() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  }
+
+  const { data: categories, error: fetchError } = await supabase
+    .from("categories")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (fetchError) {
+    throw new Error("Failed to fetch categories");
+  }
+
+  return categories;
+}
+
+
+
 export async function deleteCategoryPermanently(categoryId: string) {
   const supabase = await createClient();
 

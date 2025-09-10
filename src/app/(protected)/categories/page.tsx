@@ -5,10 +5,11 @@ import { FolderArchive, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ClientCategories } from "./components/client-categories";
 import { AddCategoryDialog } from "./components/add-category-dialog";
+import { getCategories } from "./actions";
 
 export default async function CategoriesPage() {
-  const supabase = await createClient();
-  const { data: categories } = await supabase.from("categories").select("*");
+    const categories = await getCategories();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
