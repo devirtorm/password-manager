@@ -92,7 +92,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-4xl">
         <form action={formAction}>
           <DialogHeader>
             <DialogTitle>Add Password</DialogTitle>

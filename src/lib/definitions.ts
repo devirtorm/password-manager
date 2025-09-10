@@ -31,6 +31,24 @@ export const LoginFormSchema = z.object({
     .trim(),
 })
 
+export const CategoryFormSchema = z.object({
+  categoryName: z
+    .string()
+    .min(2, { message: 'Category name must be at least 2 characters long.' })
+    .max(100, { message: 'Category name must be at most 100 characters long.' })
+    .trim(),
+  categoryDescription: z
+    .string()
+    .max(500, { message: 'Description must be at most 500 characters long.' })
+    .trim()
+    .nullable(),
+  categoryColor: z
+    .string()
+    .regex(/^#[0-9A-F]{6}$/i, {
+      message: 'Invalid color format. Please use a hex color code.',
+    }),
+})
+
 // Master Password Schema (for signup confirmation)
 export const MasterPasswordSchema = z.object({
   masterPassword: z
@@ -70,6 +88,23 @@ export type LoginFormState =
         password?: string[]
       }
       message?: string
+    }
+  | undefined
+
+export type CategoryFormState =
+  | {
+      errors?: {
+        categoryName?: string[]
+        categoryDescription?: string[]
+        categoryColor?: string[]
+      }
+      message?: string
+      success?: boolean
+      inputs?: {
+        categoryName?: string
+        categoryDescription?: string | null
+        categoryColor?: string | null
+      }
     }
   | undefined
 

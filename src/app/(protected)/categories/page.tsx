@@ -4,6 +4,7 @@ import { AddPasswordDialog } from "../components/add-password-dialog";
 import { FolderArchive, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ClientCategories } from "./components/client-categories";
+import { AddCategoryDialog } from "./components/add-category-dialog";
 
 export default async function CategoriesPage() {
   const supabase = await createClient();
@@ -17,12 +18,12 @@ export default async function CategoriesPage() {
             View and organize your password categories
           </p>
         </div>
-        <AddPasswordDialog>
+        <AddCategoryDialog>
           <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
             <Plus className="h-4 w-4" />
             Add Category
           </Button>
-        </AddPasswordDialog>
+        </AddCategoryDialog>
       </div>
 
       <div className="flex gap-2">
