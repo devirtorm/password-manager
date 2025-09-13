@@ -29,7 +29,7 @@ export default async function PasswordsPage() {
           </p>
         </div>
         <AddPasswordDialog>
-          <Button className="gap-2 bg-indigo-500 hover:bg-indigo-600 text-white">
+          <Button className="gap-2">
             <Plus className="h-4 w-4" />
             Add Password
           </Button>

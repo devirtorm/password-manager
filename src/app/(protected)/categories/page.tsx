@@ -6,32 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { ClientCategories } from "./components/client-categories";
 import { AddCategoryDialog } from "./components/add-category-dialog";
 import { getCategories } from "./actions";
+import CategoriesBadge from "./components/categories-badge";
+import CategoriesHeader from "./components/categories-header";
 
 export default async function CategoriesPage() {
-    const categories = await getCategories();
+  const categories = await getCategories();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="text-muted-foreground">
-            View and organize your password categories
-          </p>
-        </div>
-        <AddCategoryDialog>
-          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700">
-            <Plus className="h-4 w-4" />
-            Add Category
-          </Button>
-        </AddCategoryDialog>
-      </div>
-
+      <CategoriesHeader />
       <div className="flex gap-2">
-        <Badge variant="outline" className="gap-1">
-          <FolderArchive className="h-3 w-3" />
-          {categories?.length || 0} categories
-        </Badge>
+        <CategoriesBadge count={categories?.length} />
       </div>
       <ClientCategories categories={categories || []} isTrash={false} />
     </div>

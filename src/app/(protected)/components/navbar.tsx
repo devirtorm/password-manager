@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "../../../../utils/client";
 import { SessionStatus } from "./session-status";
 import { masterPasswordCache } from "@/utils/master-password-session";
+import { ModeToggle } from "@/components/ui/toggle-theme";
 
 interface NavbarProps {
   user?: {
@@ -91,6 +92,7 @@ export default function Navbar({ user, userDetails, onMenuClick }: NavbarProps) 
         <div className="flex items-center space-x-4">
           {/* Session Status */}
           <SessionStatus />
+          <ModeToggle />
 
           {/* Notifications */}
           <Button variant="ghost" size="sm" className="relative">

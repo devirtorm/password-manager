@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Shield, Smartphone, Key, Lock} from "lucide-react";
 import { createClient } from "../../utils/server";
 import { redirect } from "next/navigation";
+import { ModeToggle } from "@/components/ui/toggle-theme";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -26,12 +27,13 @@ export default async function Home() {
               </span>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" className="border-indigo-300 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800" asChild>
+              <Button variant="outline" asChild>
                 <Link href="/login" >Log In</Link>
               </Button>
-              <Button className="bg-indigo-800 hover:bg-indigo-700 text-white border border-indigo-800">
+              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-600">
                 <Link href="/signup">Sign Up</Link>
               </Button>
+              <ModeToggle />
             </div>
           </div>
         </div>
@@ -40,7 +42,7 @@ export default async function Home() {
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 py-24">
           <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-500 shadow-indigo-400 shadow-2xl text-indigo-50 border border-indigo-300 text-sm font-medium mb-8">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-500 shadow-indigo-400 shadow-2xl text-indigo-50 border border-indigo-300 text-sm font-medium mb-8 dark:border-neutral-700">
               <Lock className="w-4 h-4 mr-2" />
               Secure & Simple
             </div>
@@ -50,7 +52,7 @@ export default async function Home() {
               <span className="text-indigo-600 rounded-2xl mt-3 px-4">Simplified</span>
             </h1> 
 
-            <p className="text-xl text-gray-700 font-semibold mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-700 font-semibold mb-8 max-w-3xl mx-auto leading-relaxed dark:text-gray-300">
               A modern, secure password manager built with Next.js and TypeScript. 
               Store, generate, and manage all your passwords in one place.
             </p>
@@ -59,7 +61,7 @@ export default async function Home() {
               <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg px-8 py-6 border border-indigo-800 shadow-lg" asChild>
                 <Link href="/login">Try Demo</Link>
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-indigo-300 text-indigo-700 hover:bg-indigo-100" asChild>
+              <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-indigo-300 text-indigo-700 hover:bg-indigo-100 dark:text-white" asChild>
                 <Link href="https://github.com/devirtorm/password-manager" target="_blank">
                   View on GitHub
                 </Link>
@@ -67,7 +69,7 @@ export default async function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300">
+              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300 dark:border-neutral-700">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto border border-white/30">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
@@ -75,7 +77,7 @@ export default async function Home() {
                 <p className="text-white">Your passwords are encrypted and stored securely using modern encryption standards.</p>
               </div>
               
-              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300">
+              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300 dark:border-neutral-700">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto border border-white/30">
                   <Key className="w-6 h-6 text-white" />
                 </div>
@@ -83,7 +85,7 @@ export default async function Home() {
                 <p className="text-white">Generate strong, unique passwords with customizable length and character sets.</p>
               </div>
               
-              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300">
+              <div className="bg-indigo-600 backdrop-blur-sm rounded-2xl p-8 border border-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all duration-300 dark:border-neutral-700">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4 mx-auto border border-white/30">
                   <Smartphone className="w-6 h-6 text-white" />
                 </div>

@@ -3,23 +3,13 @@ import { Badge } from "@/components/ui/badge";
 import { FolderArchive, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import CategoriesHeader from "./components/categories-header";
 
 export default function CategoriesLoading() {
   return (
     <div className="space-y-6">
       {/* Header section */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
-          <p className="text-muted-foreground">
-            View and organize your password categories
-          </p>
-        </div>
-        <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" disabled>
-          <Plus className="h-4 w-4" />
-          Add Category
-        </Button>
-      </div>
+      <CategoriesHeader />
 
       {/* Badge section */}
       <div className="flex gap-2">
@@ -34,7 +24,7 @@ export default function CategoriesLoading() {
       <div className="space-y-6">
         {/* Search bar skeleton */}
         <Skeleton className="h-10 w-full max-w-sm" />
-        
+
         {/* Category cards grid skeleton */}
         <div className="grid gap-4 cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (

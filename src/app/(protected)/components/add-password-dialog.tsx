@@ -204,19 +204,18 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
 
           {/* Solo mostrar el campo de master password si no está en cache */}
           {!isUnlocked && (
-            <div className="grid gap-3 my-2 border p-3 rounded-sm bg-indigo-50/50">
+            <div className="grid gap-3 my-2 border p-3 rounded-md bg-muted border-muted text-foreground dark:bg-muted dark:border-muted dark:text-foreground">
               <div className="grid gap-3">
                 <Label htmlFor="master-password">Master Password</Label>
                 <div className="relative">
                   <Input
-                    className="bg-white"
+                    className="bg-background dark:bg-background"
                     id="master-password"
                     name="masterPassword"
                     placeholder="Enter your master password"
                     type={changeTypeInput(showMasterPassword)}
                     required
                     onChange={(e) => {
-                      // Guardar la master password en cache cuando se escribe
                       if (e.target.value.length > 0) {
                         unlock(e.target.value);
                       }
@@ -241,12 +240,12 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
 
           {/* Mostrar información cuando la master password está en cache */}
           {isUnlocked && (
-            <div className="grid gap-3 my-2 border p-3 rounded-sm bg-green-50/50 border-green-200">
-              <div className="flex items-center gap-2 text-sm text-green-700">
+            <div className="grid gap-3 my-2 border p-3 rounded-md bg-green-50 border-green-200 text-green-700 dark:bg-green-900/40 dark:border-green-800 dark:text-green-300">
+              <div className="flex items-center gap-2 text-sm">
                 <Eye className="h-4 w-4" />
                 <span>Master password is cached for this session</span>
               </div>
-              <p className="text-xs text-green-600">
+              <p className="text-xs">
                 Your passwords will be encrypted automatically. Cache will clear
                 when you refresh the page.
               </p>
@@ -267,11 +266,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="bg-indigo-600 hover:bg-indigo-700"
-              disabled={isPending}
-            >
+            <Button type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save Password"}
             </Button>
           </DialogFooter>

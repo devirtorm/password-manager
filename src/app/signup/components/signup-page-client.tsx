@@ -5,6 +5,7 @@ import { useState } from "react";
 import SignupForm from "./signup-form";
 import EmailVerificationStep from "./email-verification-step";
 import SignupProgress from "./signup-progress";
+import { ModeToggle } from "@/components/ui/toggle-theme";
 
 type SignupStep = "signup" | "email-verification";
 
@@ -54,6 +55,7 @@ export default function SignupPageClient() {
             <span className="text-2xl font-bold text-indigo-500">SignSafe</span>
           </a>
         </div>
+        <ModeToggle />
       </div>
       
       <div className="flex-1 flex items-center justify-center p-4">

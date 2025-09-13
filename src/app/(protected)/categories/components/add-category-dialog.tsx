@@ -140,7 +140,7 @@ export function AddCategoryDialog({ children }: AddCategoryDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button className="bg-indigo-600 hover:bg-indigo-700" type="submit" disabled={isPending}>
+            <Button className="" type="submit" disabled={isPending}>
               {isPending ? "Saving..." : "Save Category"}
             </Button>
           </DialogFooter>

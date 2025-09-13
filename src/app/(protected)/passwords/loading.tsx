@@ -14,7 +14,7 @@ export default function PasswordsLoading() {
             Manage your saved passwords securely
           </p>
         </div>
-        <Button className="gap-2 bg-indigo-500 hover:bg-indigo-600 text-white" disabled>
+        <Button disabled>
           <Plus className="h-4 w-4" />
           Add Password
         </Button>

@@ -1,12 +1,27 @@
 import { Password } from "@/app/types/password";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { Badge, Copy, Edit, Eye, EyeOff, Files, Globe, Link2, Loader2, MoreHorizontal, Trash2, RotateCcw, X } from "lucide-react";
+import {
+  Badge,
+  Copy,
+  Edit,
+  Eye,
+  EyeOff,
+  Files,
+  Globe,
+  Link2,
+  Loader2,
+  MoreHorizontal,
+  Trash2,
+  RotateCcw,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -30,11 +45,16 @@ export default function PasswordCard({
   onPermanentDelete,
 }: PasswordCardProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(null);
+  const [decryptedPassword, setDecryptedPassword] = useState<string | null>(
+    null
+  );
   const [isDecrypting, setIsDecrypting] = useState(false);
-  const [showMasterPasswordDialog, setShowMasterPasswordDialog] = useState(false);
-  const [pendingAction, setPendingAction] = useState<'show' | 'copy' | null>(null);
-  
+  const [showMasterPasswordDialog, setShowMasterPasswordDialog] =
+    useState(false);
+  const [pendingAction, setPendingAction] = useState<"show" | "copy" | null>(
+    null
+  );
+
   const { isUnlocked, getCachedPassword } = useMasterPasswordSession();
 
   // Reset password visibility when vault is locked
@@ -101,14 +121,16 @@ export default function PasswordCard({
         masterPassword
       );
       setDecryptedPassword(decrypted);
-      
-      if (pendingAction === 'show') {
+
+      if (pendingAction === "show") {
         setShowPassword(true);
-      } else if (pendingAction === 'copy') {
+      } else if (pendingAction === "copy") {
         await copyToClipboard(decrypted, "Password");
       }
     } catch (error) {
-      toast.error("Failed to decrypt password. Please check your master password.");
+      toast.error(
+        "Failed to decrypt password. Please check your master password."
+      );
       throw error;
     } finally {
       setIsDecrypting(false);
@@ -147,14 +169,14 @@ export default function PasswordCard({
         setShowPassword(true);
       } catch (error) {
         // If cached password fails, show dialog
-        setPendingAction('show');
+        setPendingAction("show");
         setShowMasterPasswordDialog(true);
       } finally {
         setIsDecrypting(false);
       }
     } else {
       // No cached password available, show dialog
-      setPendingAction('show');
+      setPendingAction("show");
       setShowMasterPasswordDialog(true);
     }
   };
@@ -185,20 +207,20 @@ export default function PasswordCard({
         await copyToClipboard(decrypted, "Password");
       } catch (error) {
         // If cached password fails, show dialog
-        setPendingAction('copy');
+        setPendingAction("copy");
         setShowMasterPasswordDialog(true);
       } finally {
         setIsDecrypting(false);
       }
     } else {
       // No cached password available, show dialog
-      setPendingAction('copy');
+      setPendingAction("copy");
       setShowMasterPasswordDialog(true);
     }
   };
 
   return (
-    <Card className="h-full shadow-sm border border-gray-200">
+    <Card className="h-full shadow-sm border border-gray-200 dark:border-neutral-800">
       <CardContent className="p-5 flex flex-col gap-4">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 border-2 bg-neutral-100 rounded-lg flex items-center justify-center shadow-sm">
@@ -206,12 +228,12 @@ export default function PasswordCard({
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
               {password.title}
             </h3>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               {password.username && (
-                <span className="truncate text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-800 border border-gray-300">
+                <span className="truncate text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-800 border border-gray-300 dark:bg-neutral-800 dark:border-neutral-600 dark:text-white">
                   {password.username}
                 </span>
               )}
@@ -234,7 +256,7 @@ export default function PasswordCard({
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              
+
               {onDeactivate && (
                 <>
                   <DropdownMenuItem onClick={handleDuplicatePassword}>
@@ -260,7 +282,7 @@ export default function PasswordCard({
                   Restore
                 </DropdownMenuItem>
               )}
-              
+
               {onPermanentDelete && (
                 <DropdownMenuItem
                   className="text-red-600"
@@ -277,7 +299,7 @@ export default function PasswordCard({
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
-            className="bg-indigo-500 hover:bg-indigo-600 text-xs px-3"
+            className="bg-indigo-500 hover:bg-indigo-600 text-xs px-3 dark:text-white"
             onClick={handleCopyUsername}
           >
             <Copy className="h-4 w-4 mr-1" />
@@ -286,7 +308,7 @@ export default function PasswordCard({
 
           <Button
             size="sm"
-            className="bg-gray-600 hover:bg-gray-700 text-xs px-3"
+            className="bg-gray-600 hover:bg-gray-700 text-xs px-3 dark:text-white"
             onClick={handleCopyPassword}
             disabled={isDecrypting}
           >
@@ -301,7 +323,7 @@ export default function PasswordCard({
           <Button
             variant="outline"
             size="sm"
-            className="border-gray-300 text-gray-700 text-xs px-3"
+            className="border-gray-300 text-gray-700 text-xs px-3 dark:text-white"
             onClick={handleShowPassword}
             disabled={isDecrypting}
           >
@@ -315,7 +337,7 @@ export default function PasswordCard({
             {isDecrypting ? "Loading..." : showPassword ? "Hide" : "Show"}
           </Button>
         </div>
-        <div className="text-xs text-gray-500 truncate border border-gray-200 rounded px-2 py-1">
+        <div className="text-xs text-gray-500 truncate border border-gray-200 rounded px-2 py-1 dark:border-neutral-700">
           <Link
             href={password.url || "#"}
             target="_blank"

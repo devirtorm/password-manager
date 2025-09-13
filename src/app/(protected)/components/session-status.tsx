@@ -72,7 +72,7 @@ export function SessionStatus() {
           onClick={handleUnlock}
           className="h-auto p-0 hover:bg-transparent"
         >
-          <Badge className="bg-indigo-700 hover:bg-indigo-600 text-white flex items-center gap-2 text-xs cursor-pointer transition-colors">
+          <Badge>
             <Lock className="h-4 w-4" />
             <span>Vault Locked - Click to Unlock</span>
           </Badge>

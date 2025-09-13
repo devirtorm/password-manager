@@ -12,7 +12,7 @@ export default function DashboardHeader() {
         </p>
       </div>
       <AddPasswordDialog>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
+        <Button className="cursor-pointer">
           <PlusCircle className="mr-2 h-4 w-4" />
           Add Password
         </Button>

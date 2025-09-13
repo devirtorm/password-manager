@@ -186,7 +186,7 @@ export function Sidebar({
                     className={cn(
                       "w-full justify-start",
                       collapsed && !isMobile ? "px-2" : "px-3",
-                      isActive && "bg-indigo-100 text-indigo-900 hover:bg-indigo-200"
+                      isActive
                     )}
                   >
                     <Icon
