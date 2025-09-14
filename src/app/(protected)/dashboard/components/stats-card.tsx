@@ -38,7 +38,7 @@ export default async function StatsCards() {
   const totalCategories = categories?.length || 0;
   const recentlyAdded = recentPasswords.length;
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <Card className="p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -48,18 +48,6 @@ export default async function StatsCards() {
             <p className="text-2xl font-bold">{totalPasswords}</p>
           </div>
           <Key className="h-6 w-6 text-muted-foreground" />
-        </div>
-      </Card>
-
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Weak Passwords
-            </p>
-            <p className="text-2xl font-bold text-red-600">3</p>
-          </div>
-          <AlertTriangle className="h-6 w-6 text-red-600" />
         </div>
       </Card>
 

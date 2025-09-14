@@ -15,6 +15,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
 import { masterPasswordCache } from "@/utils/master-password-session";
+import { changeTypeInput } from "../../../../utils/show-password";
+import { PasswordInput } from "@/components/ui/password-input";
 
 interface MasterPasswordDialogProps {
   open: boolean;
@@ -24,19 +26,20 @@ interface MasterPasswordDialogProps {
   description?: string;
 }
 
-export function MasterPasswordDialog({ 
-  open, 
-  onOpenChange, 
+export function MasterPasswordDialog({
+  open,
+  onOpenChange,
   onSubmit,
   title = "Enter Master Password",
-  description = "Please enter your master password to decrypt this password."
+  description = "Please enter your master password to decrypt this password.",
 }: MasterPasswordDialogProps) {
   const [masterPassword, setMasterPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  
-  const { isUnlocked, getCachedPassword, unlock, extendSession } = useMasterPasswordSession();
+
+  const { isUnlocked, getCachedPassword, unlock, extendSession } =
+    useMasterPasswordSession();
 
   useEffect(() => {
     if (open && isUnlocked) {
@@ -54,7 +57,9 @@ export function MasterPasswordDialog({
       extendSession();
       onOpenChange(false);
     } catch (error) {
-      setError("Cached password failed. Please enter your master password again.");
+      setError(
+        "Cached password failed. Please enter your master password again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -69,14 +74,16 @@ export function MasterPasswordDialog({
 
     setIsLoading(true);
     setError("");
-    
+
     try {
       await onSubmit(masterPassword);
       unlock(masterPassword);
       setMasterPassword("");
       onOpenChange(false);
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Invalid master password");
+      setError(
+        error instanceof Error ? error.message : "Invalid master password"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -96,46 +103,38 @@ export function MasterPasswordDialog({
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="master-password">Master Password</Label>
-              <div className="relative">
-                <Input
-                  id="master-password"
-                  type={showPassword ? "text" : "password"}
-                  value={masterPassword}
-                  onChange={(e) => {
-                    setMasterPassword(e.target.value);
-                    setError("");
-                  }}
-                  placeholder="Enter your master password"
-                  className={error ? "border-red-500" : ""}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
+              <PasswordInput
+                id="master-password"
+                autoComplete="off"
+                value={masterPassword}
+                onChange={(e) => {
+                  setMasterPassword(e.target.value);
+                  setError("");
+                }}
+                placeholder="Enter your master password"
+                error={!!error}
+              />
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>
           </div>
 
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               disabled={isLoading}
             >
               Cancel
             </Button>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={isLoading || !masterPassword.trim()}>
+            <Button
+              type="submit"
+              disabled={isLoading || !masterPassword.trim()}
+            >
               {isLoading ? "Decrypting..." : "Decrypt"}
             </Button>
           </DialogFooter>

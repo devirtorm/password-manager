@@ -29,18 +29,6 @@ export default function DashboardLoading() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Weak Passwords
-              </p>
-              <Skeleton className="h-8 w-8 mt-1" />
-            </div>
-            <AlertTriangle className="h-6 w-6 text-red-600" />
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
                 Categories
               </p>
               <Skeleton className="h-8 w-8 mt-1" />

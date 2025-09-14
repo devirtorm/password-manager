@@ -9,4 +9,10 @@ export interface Password {
   // Encrypted data fields
   password_iv?: string;
   password_tag?: string;
+  category_id?: string;
+  categories?: {
+    id: string;
+    name: string;
+    color: string;
+  };
 }

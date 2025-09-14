@@ -1,14 +1,15 @@
 import { Password } from "@/app/types/password";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import {
-  Badge,
   Copy,
   Edit,
   Eye,
@@ -21,6 +22,10 @@ import {
   Trash2,
   RotateCcw,
   X,
+  User,
+  Lock,
+  Calendar,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -84,32 +89,6 @@ export default function PasswordCard({
       return;
     }
     copyToClipboard(password.username || "", "Username");
-  };
-
-  const handleDuplicatePassword = async () => {
-    // Check if vault is locked
-    if (!isUnlocked) {
-      toast.error("Vault is locked. Please unlock to duplicate password.");
-      return;
-    }
-
-    if (decryptedPassword) {
-      copyToClipboard(
-        JSON.stringify(
-          {
-            title: password.title,
-            url: password.url,
-            username: password.username,
-            password: decryptedPassword,
-          },
-          null,
-          2
-        ),
-        "Password data"
-      );
-    } else {
-      toast.error("Please decrypt the password first");
-    }
   };
 
   const handleDecryptWithMasterPassword = async (masterPassword: string) => {
@@ -219,52 +198,137 @@ export default function PasswordCard({
     }
   };
 
-  return (
-    <Card className="h-full shadow-sm border border-gray-200 dark:border-neutral-800">
-      <CardContent className="p-5 flex flex-col gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 border-2 bg-neutral-100 rounded-lg flex items-center justify-center shadow-sm">
-            <Globe className="h-5 w-5 text-gray-600" />
-          </div>
+  // Calculate password age for visual indication
+  const passwordAge = Math.floor(
+    (Date.now() - new Date(password.created_at).getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+  const isOldPassword = passwordAge > 180; // 6 months
 
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white truncate">
-              {password.title}
-            </h3>
-            <div className="flex flex-wrap items-center gap-2 mt-1">
+  // Extract domain from URL for favicon
+  const getDomain = (url: string) => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return null;
+    }
+  };
+
+  const domain = password.url ? getDomain(password.url) : null;
+
+  return (
+    <Card className="group h-full transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 border-border/50 hover:border-primary/20 bg-card/50 backdrop-blur-sm">
+      <CardContent className="p-6">
+        {/* Header with favicon and title */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            {/* Favicon or category color */}
+            <div className="relative flex-shrink-0">
+              {domain ? (
+                <div className="w-10 h-10 rounded-xl border border-border/50 bg-background/80 flex items-center justify-center shadow-sm">
+                  <img
+                    src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
+                    loading="lazy"
+                    alt=""
+                    className="w-6 h-6"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      target.nextElementSibling?.classList.remove("hidden");
+                    }}
+                  />
+                  <Globe className="w-5 h-5 text-muted-foreground hidden" />
+                </div>
+              ) : (
+                <div
+                  className="w-10 h-10 rounded-xl border-2 border-white/20 shadow-sm flex items-center justify-center"
+                  style={{
+                    backgroundColor: password.categories?.color || "#6b7280",
+                    backgroundImage:
+                      "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)",
+                  }}
+                >
+                  <Lock className="w-5 h-5 text-white" />
+                </div>
+              )}
+              {isOldPassword && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-background" />
+              )}
+            </div>
+
+            {/* Title and category */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-semibold text-foreground text-base truncate">
+                  {password.title}
+                </h3>
+                {password.categories && (
+                  <div>
+                    <div>
+                      <Badge
+                        variant="secondary"
+                        className="text-xs font-medium px-2 py-1 rounded-full"
+                      >
+                        {password.categories.name}
+                        <div
+                          className="rounded-full w-3 h-3"
+                          style={{ backgroundColor: password.categories.color }}
+                        />
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Username */}
               {password.username && (
-                <span className="truncate text-xs font-mono bg-gray-100 px-2 py-0.5 rounded text-gray-800 border border-gray-300 dark:bg-neutral-800 dark:border-neutral-600 dark:text-white">
-                  {password.username}
-                </span>
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <User className="w-3.5 h-3.5" />
+                  <span className="truncate font-mono text-xs">
+                    {password.username}
+                  </span>
+                </div>
               )}
             </div>
           </div>
 
+          {/* Dropdown menu */}
           <DropdownMenu>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleShowPassword}
+              disabled={isDecrypting}
+              className="h-9 px-3 text-xs gap-1.5 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+            >
+              {isDecrypting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : showPassword ? (
+                <EyeOff className="w-3.5 h-3.5" />
+              ) : (
+                <Eye className="w-3.5 h-3.5" />
+              )}
+            </Button>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-full"
+                className="h-8 w-8 rounded-lg"
                 disabled={isDecrypting}
               >
-                <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => onEdit?.(password)}>
                 <Edit className="h-4 w-4 mr-2" />
-                Edit
+                Edit Password
               </DropdownMenuItem>
 
               {onDeactivate && (
                 <>
-                  <DropdownMenuItem onClick={handleDuplicatePassword}>
-                    <Files className="h-4 w-4 mr-2" />
-                    Duplicate
-                  </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="text-red-600"
+                    className="text-destructive focus:text-destructive"
                     onClick={() => onDeactivate(password.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
@@ -275,7 +339,7 @@ export default function PasswordCard({
 
               {onRestore && (
                 <DropdownMenuItem
-                  className="text-green-600"
+                  className="text-green-600 focus:text-green-600"
                   onClick={() => onRestore(password.id)}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
@@ -285,7 +349,7 @@ export default function PasswordCard({
 
               {onPermanentDelete && (
                 <DropdownMenuItem
-                  className="text-red-600"
+                  className="text-destructive focus:text-destructive"
                   onClick={() => onPermanentDelete(password.id)}
                 >
                   <X className="h-4 w-4 mr-2" />
@@ -296,68 +360,71 @@ export default function PasswordCard({
           </DropdownMenu>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* URL */}
+        {password.url && (
+          <div className="mb-4">
+            <Link
+              href={password.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/link flex items-center gap-2 text-sm text-muted-foreground hover:text-primary bg-neutral-200 p-1 rounded font-mono transition-colors border-neutral-600 dark:bg-neutral-700/50 dark:border-neutral-500"
+            >
+              <Link2 className="w-3.5 h-3.5" />
+              <span className="truncate group-hover/link:underline border-b text-xs border-1">
+                {domain || password.url}
+              </span>
+            </Link>
+          </div>
+        )}
+
+        {/* Decrypted password display */}
+        {showPassword && decryptedPassword && (
+          <div className="mb-4 p-3 bg-muted/30 border border-border/50 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Password
+              </span>
+              <Shield className="w-3.5 h-3.5 text-green-500" />
+            </div>
+            <code className="text-sm font-mono text-foreground break-all select-all">
+              {decryptedPassword}
+            </code>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-2">
           <Button
             size="sm"
-            className="bg-indigo-500 hover:bg-indigo-600 text-xs px-3 dark:text-white"
+            variant="default"
             onClick={handleCopyUsername}
+            className="flex-1 text-xs gap-1.5"
           >
-            <Copy className="h-4 w-4 mr-1" />
+            <Copy className="w-3.5 h-3.5" />
             Copy User
           </Button>
 
           <Button
             size="sm"
-            className="bg-gray-600 hover:bg-gray-700 text-xs px-3 dark:text-white"
+            variant="secondary"
             onClick={handleCopyPassword}
             disabled={isDecrypting}
+            className="flex-1 h-9 text-xs gap-1.5"
           >
             {isDecrypting ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Copy className="h-4 w-4 mr-1" />
+              <Copy className="w-3.5 h-3.5" />
             )}
-            Copy Pass
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-gray-300 text-gray-700 text-xs px-3 dark:text-white"
-            onClick={handleShowPassword}
-            disabled={isDecrypting}
-          >
-            {isDecrypting ? (
-              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-            ) : showPassword ? (
-              <EyeOff className="h-4 w-4 mr-1" />
-            ) : (
-              <Eye className="h-4 w-4 mr-1" />
-            )}
-            {isDecrypting ? "Loading..." : showPassword ? "Hide" : "Show"}
+            {isDecrypting ? "Loading..." : "Copy Pass"}
           </Button>
         </div>
-        <div className="text-xs text-gray-500 truncate border border-gray-200 rounded px-2 py-1 dark:border-neutral-700">
-          <Link
-            href={password.url || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline flex items-center"
-          >
-            {password.url ? (
-              <>
-                <Link2 className="inline-block h-4 w-4 mr-1 text-gray-400" />
-                {password.url}
-              </>
-            ) : (
-              "No URL provided"
-            )}
-          </Link>
-        </div>
 
-        {showPassword && decryptedPassword && (
-          <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-mono text-gray-800 shadow-sm backdrop-blur-2xl">
-            {decryptedPassword}
+        {/* Password age indicator */}
+        {isOldPassword && (
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-orange-600 dark:text-orange-400">
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Password is {passwordAge} days old</span>
           </div>
         )}
 

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -96,7 +97,7 @@ export default function PasswordGeneratorCard() {
             Generated Password
           </Label>
           <div className="relative">
-            <div className="bg-neutral-100 text-neutral-800 p-4 rounded-lg font-mono text-xl text-center border-2 border-gray-200 min-h-[60px] flex items-center justify-center dark:bg-neutral-900 dark:text-neutral-100 dark:border-gray-700">
+            <div className="bg-neutral-100 text-neutral-800 p-4 rounded-lg font-mono text-xl text-center border-2 border-gray-200 min-h-[60px] flex items-center justify-center dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700">
               <span className="break-all">
                 {password || "Click 'Generate' to create a password"}
               </span>

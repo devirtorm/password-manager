@@ -43,16 +43,6 @@ const sidebarItems = [
     icon: Plus,
   },
   {
-    title: "Security Check",
-    href: "/security",
-    icon: Shield,
-  },
-  {
-    title: "Shared",
-    href: "/shared",
-    icon: Users,
-  },
-  {
     title: "Trash",
     href: "/passwords/trash",
     icon: Trash2,

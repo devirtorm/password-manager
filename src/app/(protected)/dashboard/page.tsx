@@ -8,10 +8,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <DashboardHeader />
       <StatsCards />
-      <div className="grid gap-6 md:grid-cols-2">
-        <SecurityOverview />
-        <RecentPassword />
-      </div>
+      <RecentPassword />
     </div>
   );
 }

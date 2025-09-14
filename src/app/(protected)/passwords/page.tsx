@@ -10,9 +10,16 @@ export default async function PasswordsPage() {
 
   const { data: passwords, error } = await supabase
     .from("passwords")
-    .select("*")
+    .select(`
+      *,
+      categories (
+        color, name
+      )
+    `)
     .eq("active", true)
     .order("created_at", { ascending: false });
+
+    console.log(passwords);
 
   if (error) {
     console.error("Error fetching passwords:", error);

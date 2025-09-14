@@ -28,9 +28,9 @@ export default function CategorieCard({
   onPermanentDelete
 }: CategorieCardProps) {
   return (
-    <Card className="group hover:shadow-lg transition-all duration-200 hover:scale-105 overflow-hidden relative">
+    <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden relative">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start">
           <div className="flex-1 pr-2">
             <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
               {category.name}
@@ -47,7 +47,6 @@ export default function CategorieCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>

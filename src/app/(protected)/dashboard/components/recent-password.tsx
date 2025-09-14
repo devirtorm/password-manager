@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createClient } from "../../../../../utils/server";
+import Link from "next/link";
 
 export default async function RecentPassword() {
   const supabase = await createClient();
@@ -27,7 +28,9 @@ export default async function RecentPassword() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">Recent Passwords</h3>
         <Button variant="outline" size="sm">
-          View All
+          <Link href="/passwords" className="flex items-center">
+            <span>View All</span>
+          </Link>
         </Button>
       </div>
       <div className="space-y-4">

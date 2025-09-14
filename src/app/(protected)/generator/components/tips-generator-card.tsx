@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OctagonX, ShieldCheck, RefreshCcw } from "lucide-react";
 import React from "react";
 
-export default function CardTipsGenerator() {
+export default function TipsGeneratorCard() {
   const cardTips = [
     {
       title: "Security",
