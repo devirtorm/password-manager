@@ -14,7 +14,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Edit, MoreHorizontal, RotateCcw, Trash2, X } from "lucide-react";
+import {
+  Edit,
+  MoreHorizontal,
+  Pencil,
+  RotateCcw,
+  Trash2,
+  X,
+} from "lucide-react";
+import { EditCategoryDialog } from "./edit-category-dialog";
 
 interface CategorieCardProps {
   category: Category;
@@ -22,10 +30,10 @@ interface CategorieCardProps {
   onPermanentDelete?: (categoryId: string) => void;
 }
 
-export default function CategorieCard({ 
+export default function CategorieCard({
   category,
   onEdit,
-  onPermanentDelete
+  onPermanentDelete,
 }: CategorieCardProps) {
   return (
     <Card className="group hover:shadow-lg transition-all duration-200 overflow-hidden relative">
@@ -41,21 +49,20 @@ export default function CategorieCard({
               </CardDescription>
             )}
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-              >
+              <Button variant="ghost" size="sm">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onEdit?.(category)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
+              <EditCategoryDialog category={category}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+              </EditCategoryDialog>
               {onPermanentDelete && (
                 <DropdownMenuItem
                   className="text-red-600 focus:text-red-600"

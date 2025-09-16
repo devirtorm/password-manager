@@ -32,8 +32,6 @@ export async function getCategories() {
   return categories;
 }
 
-
-
 export async function deleteCategoryPermanently(categoryId: string) {
   const supabase = await createClient();
 
@@ -52,7 +50,7 @@ export async function deleteCategoryPermanently(categoryId: string) {
     .eq("id", categoryId)
     .eq("user_id", user.id);
 
-    revalidatePath("/categories");
+  revalidatePath("/categories");
 
   if (deleteError) {
     throw new Error("Failed to delete category permanently");
@@ -152,5 +150,76 @@ export async function deactivateCategory(categoryId: string) {
 
   if (deactivateError) {
     throw new Error("Failed to deactivate category");
+  }
+}
+
+export async function updateCategory(
+  initialState: any,
+  formData: FormData
+): Promise<CategoryFormState> {
+  const rawData = {
+    categoryId: formData.get("categoryId")?.toString() ?? undefined,
+    categoryName: formData.get("categoryName")?.toString() ?? undefined,
+    categoryDescription:
+      formData.get("categoryDescription")?.toString() ?? undefined,
+    categoryColor: formData.get("categoryColor")?.toString() ?? undefined,
+  };
+
+  // Validar los campos usando el schema
+  const validatedFields = CategoryFormSchema.safeParse(rawData);
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      errors: validatedFields.error.flatten().fieldErrors,
+      inputs: rawData,
+    };
+  }
+
+  const { categoryId, categoryName, categoryDescription, categoryColor } =
+    validatedFields.data;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (!user || error) {
+    return {
+      message: "User not authenticated",
+    };
+  }
+
+  try {
+    const { error: updateError } = await supabase
+      .from("categories")
+      .update({
+        name: categoryName,
+        description: categoryDescription,
+        color: categoryColor,
+      })
+      .eq("id", categoryId)
+      .eq("user_id", user.id);
+
+    if (updateError) {
+      return {
+        success: false,
+        message: "Failed to update category: " + updateError.message,
+      };
+    }
+
+    revalidatePath("/categories");
+
+    return {
+      success: true,
+      message: "Category updated successfully",
+    };
+  } catch (error) {
+    console.error("Error updating category:", error);
+    return {
+      success: false,
+      message: "An unexpected error occurred. Please try again.",
+    };
   }
 }

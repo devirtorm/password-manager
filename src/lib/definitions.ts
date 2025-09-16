@@ -32,6 +32,7 @@ export const LoginFormSchema = z.object({
 })
 
 export const CategoryFormSchema = z.object({
+  categoryId: z.string().uuid({ message: 'Invalid category ID.' }).optional(),
   categoryName: z
     .string()
     .min(2, { message: 'Category name must be at least 2 characters long.' })
