@@ -12,17 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Lock, Unlock } from "lucide-react";
-import { useState, useEffect, useActionState } from "react";
-import { createPassword } from "../passwords/actions";
+import { Eye, EyeOff, Pen, Pencil } from "lucide-react";
+import { useState, useEffect, useActionState, use } from "react";
 import { toast } from "sonner";
-import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
-import { MasterPasswordDialog } from "./master-password-dialog";
-import {
-  changeTypeInput,
-  getPasswordIcon,
-} from "../../../../utils/show-password";
-import { getCategories } from "../categories/actions";
+import { masterPasswordCache } from "@/utils/master-password-session";
 import { Category } from "@/app/types/category";
 import {
   Select,
@@ -31,19 +24,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  changeTypeInput,
+  getPasswordIcon,
+} from "../../../../../utils/show-password";
+import { getCategories } from "../../categories/actions";
+import { createPassword, updatePassword } from "../actions";
+import { useMasterPasswordSession } from "@/hooks/useMasterPasswordSession";
+import { Password } from "@/app/types/password";
+import { MasterPasswordDialog } from "../../components/master-password-dialog";
 
 interface FormState {
   message?: string;
-  success?: boolean;
+  error?: string;
 }
 
 interface AddPasswordDialogProps {
   children: React.ReactNode;
+  password: Password;
 }
 
-export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
+export function EditPasswordDialog({
+  children,
+  password,
+}: AddPasswordDialogProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [showMasterPassword, setShowMasterPassword] = useState(false);
   const [open, setOpen] = useState(false);
+  const [isValid, setIsValid] = useState(false);
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false);
+
   const [categories, setCategories] = useState<Category[]>([]);
 
   const { isUnlocked, getCachedPassword, unlock, extendSession } =
@@ -52,49 +62,38 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   const [state, formAction, isPending] = useActionState(
     async (prevState: FormState, formData: FormData) => {
       try {
-        // Verificar si tenemos la master password en cache
         if (isUnlocked) {
           const cachedPassword = getCachedPassword();
           if (cachedPassword) {
             formData.set("masterPassword", cachedPassword);
-            extendSession(); // Extender sesión en uso
-          } else {
-            throw new Error("Session expired. Please refresh and try again.");
+            extendSession(); // Extend session on use
           }
-        } else {
-          throw new Error("Master password required");
         }
 
-        const result = await createPassword(formData);
-        return { success: true, message: "Password added successfully!" };
+        const result = await updatePassword(formData);
+        return { success: true, message: "Password updated successfully!" };
       } catch (error) {
         return {
           success: false,
           message:
-            error instanceof Error ? error.message : "Failed to add password",
+            error instanceof Error ? error.message : "Error updating password",
         };
       }
     },
     { success: false, message: "" }
   );
-
-  // Reset states when dialog closes
   useEffect(() => {
     if (!open) {
       setShowPassword(false);
+      setShowMasterPassword(false);
     }
-  }, [open]);
+  }, []);
 
-  // Fetch categories when dialog opens
   useEffect(() => {
     if (open) {
       const fetchCategories = async () => {
-        try {
-          const data = await getCategories();
-          setCategories(data);
-        } catch (error) {
-          toast.error("Failed to load categories");
-        }
+        const data = await getCategories();
+        setCategories(data);
       };
       fetchCategories();
     }
@@ -103,11 +102,13 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
   // Handle success/error states
   useEffect(() => {
     if (state?.success) {
-      toast.success("Password Added", {
+      toast.success("Password Updated", {
         description: "Your password has been securely saved.",
       });
       setOpen(false);
+      // Reset form states
       setShowPassword(false);
+      setShowMasterPassword(false);
     } else if (state?.message && !state.success) {
       toast.error("Error", {
         description: state.message,
@@ -117,33 +118,41 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+    getPasswordIcon(!showPassword);
   };
 
-  // Función para manejar el unlock de master password
+  const toggleMasterPasswordVisibility = () => {
+    setShowMasterPassword(!showMasterPassword);
+    getPasswordIcon(!showMasterPassword);
+  };
+
   const handleUnlockSubmit = async (masterPassword: string) => {
     try {
-      if (!masterPassword?.trim()) {
+      // Validar que la contraseña maestra no esté vacía
+      if (!masterPassword || masterPassword.trim() === "") {
         throw new Error("Master password is required");
       }
 
-      const isValid = await unlock(masterPassword);
-
-      if (!isValid) {
-        toast.error("Invalid master password");
+      // Validar longitud mínima
+      if (masterPassword.length < 8) {
         throw new Error("Invalid master password");
       }
 
-      // If valid, close dialog and show success
-      setShowPassword(false);
-      toast.success("Vault unlocked successfully");
+      // Intentar desbloquear usando el hook
+      unlock(masterPassword);
 
+      if (!isUnlocked) {
+        throw new Error("Invalid master password");
+      }
+
+      // Si llegamos aquí, la validación fue exitosa
       return Promise.resolve();
     } catch (error) {
+      // Propagar el error para que MasterPasswordDialog lo maneje
       throw error;
     }
   };
 
-  // Si no está desbloqueado, mostrar dialog de master password
   if (!isUnlocked) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
@@ -153,7 +162,7 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
           onOpenChange={setOpen}
           onSubmit={handleUnlockSubmit}
           title="Enter Master Password"
-          description="Please enter your master password to add a new password."
+          description="Please enter your master password to edit this password."
         />
       </Dialog>
     );
@@ -164,51 +173,50 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-4xl">
         <form action={formAction}>
+          <input type="hidden" name="passwordId" value={password.id} />
           <DialogHeader>
-            <DialogTitle>Add Password</DialogTitle>
-            <DialogDescription>
-              Fill in the details below to add a new password.
+            <DialogTitle>Edit Password</DialogTitle>
+            <DialogDescription className="mb-4">
+              Update your password details below and save securely.
             </DialogDescription>
           </DialogHeader>
-
           <div className="grid gap-4">
             <div className="grid gap-3">
               <Label htmlFor="name-1">Title</Label>
               <Input
                 id="name-1"
                 name="name"
+                defaultValue={password.title}
                 placeholder="ex: My Email"
                 required
               />
             </div>
-
             <div className="grid gap-3">
               <Label htmlFor="username-1">Email or Username</Label>
               <Input
                 id="username-1"
                 name="username"
+                defaultValue={password.username}
                 placeholder="ex: user@example.com"
               />
             </div>
-
             <div className="grid gap-3">
               <Label htmlFor="url-1">URL</Label>
               <Input
                 id="url-1"
                 name="url"
+                defaultValue={password.url}
                 placeholder="ex: https://example.com"
               />
             </div>
-
             <div className="grid gap-3">
               <Label htmlFor="password-1">Password</Label>
               <div className="relative">
                 <Input
                   id="password-1"
                   name="password"
-                  placeholder="ex: mypassword123."
+                  placeholder="Your password is encrypted"
                   type={changeTypeInput(showPassword)}
-                  required
                 />
                 <Button
                   type="button"
@@ -224,10 +232,13 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
                 </Button>
               </div>
             </div>
-
             <div className="grid gap-3">
               <Label htmlFor="category">Category</Label>
-              <Select name="categoryId" required>
+              <Select
+                name="categoryId"
+                defaultValue={password.category_id || ""}
+                required
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -247,19 +258,6 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
               </Select>
             </div>
           </div>
-
-          {/* Indicador de sesión activa */}
-          <div className="grid gap-3 my-4 border p-3 rounded-md bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300">
-            <div className="flex items-center gap-2 text-sm">
-              <Unlock className="h-4 w-4" />
-              <span>Master password session is active</span>
-            </div>
-            <p className="text-xs">
-              Your password will be encrypted automatically using the cached
-              master password.
-            </p>
-          </div>
-
           <DialogFooter>
             <Button
               type="button"
@@ -270,7 +268,8 @@ export function AddPasswordDialog({ children }: AddPasswordDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save Password"}
+              <Pencil className="h-4 w-4 mr-2" />
+              {isPending ? "Saving..." : "Edit Password "}
             </Button>
           </DialogFooter>
         </form>

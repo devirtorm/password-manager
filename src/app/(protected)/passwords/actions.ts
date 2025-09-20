@@ -36,7 +36,7 @@ export async function decryptUserPassword(
       masterPassword, 
       vaultConfig.salt
     );
-    
+    console.log("Decrypted password:", decrypted);
     return decrypted;
   } catch (error) {
     throw new Error("Failed to decrypt password. Invalid master password or corrupted data.");
@@ -101,6 +101,67 @@ export async function deletePasswordPermanently(passwordId: string) {
   if (deleteError) {
     throw new Error("Failed to delete password permanently");
   }
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (!user || error) {
+    throw new Error("User not authenticated");
+  } 
+
+  const passwordId = formData.get("passwordId") as string;
+  const title = formData.get("name") as string;
+  const username = formData.get("username") as string;
+  const url = formData.get("url") as string;
+  const newPassword = formData.get("password") as string | null;
+  const masterPassword = formData.get("masterPassword") as string;
+
+  if (!passwordId || !title || !masterPassword) {
+    throw new Error("Missing required fields");
+  }
+  // Get user's vault configuration
+  const { data: vaultConfig, error: vaultError } = await supabase
+    .from("vault_config")
+    .select("salt, master_password_hash")
+    .eq("user_id", user.id)
+    .single();
+  if (vaultError || !vaultConfig) {
+    throw new Error("Vault configuration not found. Please set up your master password first.");
+  }
+
+  const isValidMasterPassword = await verifyMasterPassword(
+    masterPassword, 
+    vaultConfig.master_password_hash
+  );
+
+  if (!isValidMasterPassword) {
+    throw new Error("Invalid master password");
+  }
+
+  let updateData: any = {
+    title,
+    username,
+    url,
+  };
+
+  if (newPassword) {
+    // Encrypt the new password with the VERIFIED master password
+    const { encrypted: encryptedPassword, iv } = encryptPassword(newPassword, masterPassword, vaultConfig.salt);
+    updateData.password = encryptedPassword;
+    updateData.password_iv = iv; 
+  }
+
+  const { error: updateError } = await supabase
+    .from("passwords")
+    .update(updateData)
+    .eq("id", passwordId)
+    .eq("user_id", user.id);
+  if (updateError) {
+    throw new Error("Failed to update password: " + updateError.message);
+  }
+  revalidatePath("/passwords");
+  return { success: true };
 }
 
 export async function createPassword(formData: FormData) {

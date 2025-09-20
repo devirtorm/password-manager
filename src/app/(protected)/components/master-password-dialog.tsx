@@ -9,13 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useMasterPasswordSession } from "../../../hooks/useMasterPasswordSession";
-import { masterPasswordCache } from "@/utils/master-password-session";
-import { changeTypeInput } from "../../../../utils/show-password";
 import { PasswordInput } from "@/components/ui/password-input";
 
 interface MasterPasswordDialogProps {
@@ -34,7 +30,6 @@ export function MasterPasswordDialog({
   description = "Please enter your master password to decrypt this password.",
 }: MasterPasswordDialogProps) {
   const [masterPassword, setMasterPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -109,7 +104,6 @@ export function MasterPasswordDialog({
               <Label htmlFor="master-password">Master Password</Label>
               <PasswordInput
                 id="master-password"
-                autoComplete="off"
                 value={masterPassword}
                 onChange={(e) => {
                   setMasterPassword(e.target.value);
@@ -117,6 +111,8 @@ export function MasterPasswordDialog({
                 }}
                 placeholder="Enter your master password"
                 error={!!error}
+                showToggle={true}
+                disabled={isLoading}
               />
               {error && <p className="text-sm text-red-500">{error}</p>}
             </div>

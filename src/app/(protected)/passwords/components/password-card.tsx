@@ -26,6 +26,7 @@ import {
   Lock,
   Calendar,
   Shield,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -33,6 +34,8 @@ import { toast } from "sonner";
 import { MasterPasswordDialog } from "../../components/master-password-dialog";
 import { decryptUserPassword } from "../actions";
 import { useMasterPasswordSession } from "@/hooks/useMasterPasswordSession";
+import { EditCategoryDialog } from "../../categories/components/edit-category-dialog";
+import { EditPasswordDialog } from "./edit-password-dialog";
 
 interface PasswordCardProps {
   password: Password;
@@ -320,10 +323,12 @@ export default function PasswordCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onEdit?.(password)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Password
-              </DropdownMenuItem>
+              <EditPasswordDialog password={password}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+              </EditPasswordDialog>
 
               {onDeactivate && (
                 <>

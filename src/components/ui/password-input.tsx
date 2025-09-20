@@ -20,7 +20,7 @@ interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement>
 // forwardRef permite que componentes padre accedan al elemento DOM subyacente
 // Útil para formularios, focus management, etc.
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className, error, showToggle = false, ...props }, ref) => {
+  ({ className, autoComplete, error, showToggle = false, ...props }, ref) => {
     // useState hook para manejar el estado de visibilidad de la contraseña
     // showPassword: valor actual del estado
     // setShowPassword: función para actualizar el estado
@@ -33,9 +33,10 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           className={cn( 
             error && "border-destructive", 
             showToggle && "pr-12",
-            className 
+            className
           )}
           ref={ref} // Forwarded ref del componente padre
+          autoComplete="off" 
           {...props} // Spread operator: pasa todas las props restantes al Input
         />
         {showToggle && ( // Renderizado condicional: solo muestra el botón si showToggle es true

@@ -1,23 +1,25 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Lock, Unlock, Clock, LogOut } from 'lucide-react';
-import { useMasterPasswordSession } from '@/hooks/useMasterPasswordSession';
-import { masterPasswordCache } from '@/utils/master-password-session';
-import { MasterPasswordDialog } from './master-password-dialog';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Lock, Unlock, Clock, LogOut } from "lucide-react";
+import { useMasterPasswordSession } from "@/hooks/useMasterPasswordSession";
+import { masterPasswordCache } from "@/utils/master-password-session";
+import { MasterPasswordDialog } from "./master-password-dialog";
+import { toast } from "sonner";
 
 export function SessionStatus() {
-  const { isUnlocked, lock } = useMasterPasswordSession();
-  const [displayTime, setDisplayTime] = useState('');
+  const { isUnlocked, getCachedPassword, unlock, extendSession, lock } =
+    useMasterPasswordSession();
+  const [displayTime, setDisplayTime] = useState("");
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
 
   useEffect(() => {
     const formatTime = (milliseconds: number) => {
       const minutes = Math.floor(milliseconds / (1000 * 60));
       const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     };
 
     const updateDisplayTime = () => {
@@ -26,10 +28,10 @@ export function SessionStatus() {
         if (remaining > 0) {
           setDisplayTime(formatTime(remaining));
         } else {
-          setDisplayTime('');
+          setDisplayTime("");
         }
       } else {
-        setDisplayTime('');
+        setDisplayTime("");
       }
     };
 
@@ -58,9 +60,29 @@ export function SessionStatus() {
   };
 
   const handleUnlockSubmit = async (masterPassword: string) => {
-    // Esta función solo necesita validar que la contraseña es correcta
-    // El MasterPasswordDialog ya maneja el unlock automáticamente
-    return Promise.resolve();
+    try {
+      if (!masterPassword?.trim()) {
+        throw new Error("Master password is required");
+      }
+
+      // Now we wait for the unlock result
+      const isValid = await unlock(masterPassword);
+
+      if (!isValid) {
+        // Show toast and also throw error
+        toast.error("Invalid master password");
+        throw new Error("Invalid master password");
+      }
+
+      // If valid, close dialog and show success
+      setShowUnlockDialog(false);
+      toast.success("Vault unlocked successfully");
+
+      return Promise.resolve();
+    } catch (error) {
+      // Re-throw the error so MasterPasswordDialog can handle it
+      throw error;
+    }
   };
 
   if (!isUnlocked) {
@@ -77,7 +99,7 @@ export function SessionStatus() {
             <span>Vault Locked - Click to Unlock</span>
           </Badge>
         </Button>
-        
+
         <MasterPasswordDialog
           open={showUnlockDialog}
           onOpenChange={setShowUnlockDialog}
@@ -97,14 +119,14 @@ export function SessionStatus() {
           Unlocked
         </Badge>
       </div>
-      
+
       {displayTime && (
         <div className="flex items-center gap-1 text-sm text-gray-600">
           <Clock className="h-3 w-3" />
           <span className="font-mono text-xs">{displayTime}</span>
         </div>
       )}
-      
+
       <Button
         variant="ghost"
         size="sm"
